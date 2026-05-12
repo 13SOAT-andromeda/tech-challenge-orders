@@ -5,11 +5,11 @@ import (
 	"fmt"
 	"time"
 
-	orderMaintenanceModel "github.com/13SOAT-andromeda/tech-challenge-s1/internal/adapter/database/model/order_maintenance"
-	orderProductModel "github.com/13SOAT-andromeda/tech-challenge-s1/internal/adapter/database/model/order_product"
-	appmetrics "github.com/13SOAT-andromeda/tech-challenge-s1/internal/adapter/metrics"
-	"github.com/13SOAT-andromeda/tech-challenge-s1/internal/application/ports"
-	"github.com/13SOAT-andromeda/tech-challenge-s1/internal/domain"
+	orderMaintenanceModel "github.com/13SOAT-andromeda/tech-challenge-orders/internal/adapter/database/model/order_maintenance"
+	orderProductModel "github.com/13SOAT-andromeda/tech-challenge-orders/internal/adapter/database/model/order_product"
+	appmetrics "github.com/13SOAT-andromeda/tech-challenge-orders/internal/adapter/metrics"
+	"github.com/13SOAT-andromeda/tech-challenge-orders/internal/application/ports"
+	"github.com/13SOAT-andromeda/tech-challenge-orders/internal/domain"
 )
 
 type UseCase struct {

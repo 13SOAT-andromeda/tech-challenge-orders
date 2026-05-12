@@ -10,7 +10,7 @@ import (
 	"runtime"
 	"strconv"
 
-	"github.com/13SOAT-andromeda/tech-challenge-s1/internal/adapter/config"
+	"github.com/13SOAT-andromeda/tech-challenge-orders/internal/adapter/config"
 )
 
 func SetupTest() (*config.Config, error) {

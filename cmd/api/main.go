@@ -11,17 +11,17 @@ import (
 	"github.com/DataDog/dd-trace-go/v2/profiler"
 	"go.uber.org/zap"
 
-	"github.com/13SOAT-andromeda/tech-challenge-s1/internal/adapter/config"
-	"github.com/13SOAT-andromeda/tech-challenge-s1/internal/adapter/database"
-	"github.com/13SOAT-andromeda/tech-challenge-s1/internal/adapter/database/model/order"
-	"github.com/13SOAT-andromeda/tech-challenge-s1/internal/adapter/database/repository"
-	"github.com/13SOAT-andromeda/tech-challenge-s1/internal/adapter/email"
-	"github.com/13SOAT-andromeda/tech-challenge-s1/internal/adapter/http"
-	"github.com/13SOAT-andromeda/tech-challenge-s1/internal/adapter/http/handlers"
-	appmetrics "github.com/13SOAT-andromeda/tech-challenge-s1/internal/adapter/metrics"
-	"github.com/13SOAT-andromeda/tech-challenge-s1/internal/application/ports"
-	"github.com/13SOAT-andromeda/tech-challenge-s1/internal/application/services"
-	orderUsecase "github.com/13SOAT-andromeda/tech-challenge-s1/internal/application/usecases/order"
+	"github.com/13SOAT-andromeda/tech-challenge-orders/internal/adapter/config"
+	"github.com/13SOAT-andromeda/tech-challenge-orders/internal/adapter/database"
+	"github.com/13SOAT-andromeda/tech-challenge-orders/internal/adapter/database/model/order"
+	"github.com/13SOAT-andromeda/tech-challenge-orders/internal/adapter/database/repository"
+	"github.com/13SOAT-andromeda/tech-challenge-orders/internal/adapter/email"
+	"github.com/13SOAT-andromeda/tech-challenge-orders/internal/adapter/http"
+	"github.com/13SOAT-andromeda/tech-challenge-orders/internal/adapter/http/handlers"
+	appmetrics "github.com/13SOAT-andromeda/tech-challenge-orders/internal/adapter/metrics"
+	"github.com/13SOAT-andromeda/tech-challenge-orders/internal/application/ports"
+	"github.com/13SOAT-andromeda/tech-challenge-orders/internal/application/services"
+	orderUsecase "github.com/13SOAT-andromeda/tech-challenge-orders/internal/application/usecases/order"
 )
 
 func main() {

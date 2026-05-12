@@ -4,11 +4,11 @@ import (
 	"net/http"
 	"strconv"
 
-	"github.com/13SOAT-andromeda/tech-challenge-s1/internal/adapter/http/middlewares"
-	"github.com/13SOAT-andromeda/tech-challenge-s1/internal/adapter/http/response"
-	"github.com/13SOAT-andromeda/tech-challenge-s1/internal/application/ports"
-	"github.com/13SOAT-andromeda/tech-challenge-s1/internal/domain"
-	"github.com/13SOAT-andromeda/tech-challenge-s1/pkg/converters"
+	"github.com/13SOAT-andromeda/tech-challenge-orders/internal/adapter/http/middlewares"
+	"github.com/13SOAT-andromeda/tech-challenge-orders/internal/adapter/http/response"
+	"github.com/13SOAT-andromeda/tech-challenge-orders/internal/application/ports"
+	"github.com/13SOAT-andromeda/tech-challenge-orders/internal/domain"
+	"github.com/13SOAT-andromeda/tech-challenge-orders/pkg/converters"
 	"github.com/gin-gonic/gin"
 )
 

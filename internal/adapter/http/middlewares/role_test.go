@@ -5,7 +5,7 @@ import (
 	"net/http/httptest"
 	"testing"
 
-	"github.com/13SOAT-andromeda/tech-challenge-s1/internal/adapter/http/middlewares"
+	"github.com/13SOAT-andromeda/tech-challenge-orders/internal/adapter/http/middlewares"
 	"github.com/gin-gonic/gin"
 	"github.com/stretchr/testify/assert"
 )
@@ -39,7 +39,7 @@ func TestRoleRequired_MatchingRole(t *testing.T) {
 
 func TestRoleRequired_MultipleRoles(t *testing.T) {
 	r := setupRoleRouter("mechanic", "attendant")
-	
+
 	t.Run("Matches first role", func(t *testing.T) {
 		req := httptest.NewRequest(http.MethodGet, "/test", nil)
 		setAuthHeaders(req, "1", "test@example.com", "mechanic")

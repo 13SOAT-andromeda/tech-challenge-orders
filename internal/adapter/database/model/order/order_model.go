@@ -3,12 +3,12 @@ package order
 import (
 	"time"
 
-	"github.com/13SOAT-andromeda/tech-challenge-s1/internal/adapter/database/model/company"
-	customerVehicle "github.com/13SOAT-andromeda/tech-challenge-s1/internal/adapter/database/model/customer_vehicle"
-	"github.com/13SOAT-andromeda/tech-challenge-s1/internal/adapter/database/model/employee"
-	"github.com/13SOAT-andromeda/tech-challenge-s1/internal/adapter/database/model/order_maintenance"
-	"github.com/13SOAT-andromeda/tech-challenge-s1/internal/adapter/database/model/order_product"
-	"github.com/13SOAT-andromeda/tech-challenge-s1/internal/domain"
+	"github.com/13SOAT-andromeda/tech-challenge-orders/internal/adapter/database/model/company"
+	customerVehicle "github.com/13SOAT-andromeda/tech-challenge-orders/internal/adapter/database/model/customer_vehicle"
+	"github.com/13SOAT-andromeda/tech-challenge-orders/internal/adapter/database/model/employee"
+	"github.com/13SOAT-andromeda/tech-challenge-orders/internal/adapter/database/model/order_maintenance"
+	"github.com/13SOAT-andromeda/tech-challenge-orders/internal/adapter/database/model/order_product"
+	"github.com/13SOAT-andromeda/tech-challenge-orders/internal/domain"
 	"gorm.io/gorm"
 )
 

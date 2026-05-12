@@ -1,4 +1,4 @@
-module github.com/13SOAT-andromeda/tech-challenge-s1
+module github.com/13SOAT-andromeda/tech-challenge-orders
 
 go 1.25.0
 

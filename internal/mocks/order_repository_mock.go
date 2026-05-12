@@ -3,8 +3,8 @@ package mocks
 import (
 	"context"
 
-	"github.com/13SOAT-andromeda/tech-challenge-s1/internal/adapter/database/model/order"
-	"github.com/13SOAT-andromeda/tech-challenge-s1/internal/application/ports"
+	"github.com/13SOAT-andromeda/tech-challenge-orders/internal/adapter/database/model/order"
+	"github.com/13SOAT-andromeda/tech-challenge-orders/internal/application/ports"
 	"github.com/stretchr/testify/mock"
 )
 

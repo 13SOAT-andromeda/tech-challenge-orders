@@ -6,7 +6,7 @@ import (
 	"fmt"
 	"log"
 
-	"github.com/13SOAT-andromeda/tech-challenge-s1/internal/adapter/config"
+	"github.com/13SOAT-andromeda/tech-challenge-orders/internal/adapter/config"
 	gormtrace "github.com/DataDog/dd-trace-go/contrib/gorm.io/gorm.v1/v2"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"

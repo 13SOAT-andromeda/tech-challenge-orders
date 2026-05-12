@@ -3,8 +3,8 @@ package ports
 import (
 	"context"
 
-	"github.com/13SOAT-andromeda/tech-challenge-s1/internal/adapter/database/model/order"
-	"github.com/13SOAT-andromeda/tech-challenge-s1/internal/domain"
+	"github.com/13SOAT-andromeda/tech-challenge-orders/internal/adapter/database/model/order"
+	"github.com/13SOAT-andromeda/tech-challenge-orders/internal/domain"
 )
 
 type OrderSearch struct {

@@ -5,7 +5,7 @@ import (
 	"net/http/httptest"
 	"testing"
 
-	"github.com/13SOAT-andromeda/tech-challenge-s1/internal/adapter/http/middlewares"
+	"github.com/13SOAT-andromeda/tech-challenge-orders/internal/adapter/http/middlewares"
 	"github.com/gin-gonic/gin"
 	"github.com/stretchr/testify/assert"
 )
@@ -14,7 +14,7 @@ func setupRefactoredAuthRouter() *gin.Engine {
 	gin.SetMode(gin.TestMode)
 	r := gin.New()
 	// Note: This will not compile initially because AuthRequired still expects a string argument
-	r.Use(middlewares.AuthRequired()) 
+	r.Use(middlewares.AuthRequired())
 	r.GET("/test", func(c *gin.Context) {
 		id, _ := c.Get(middlewares.UserIDKey)
 		email, _ := c.Get(middlewares.UserEmailKey)
@@ -78,8 +78,8 @@ func TestAuthRequired_Refactor(t *testing.T) {
 		{
 			name: "Failure - Missing X-User-Email",
 			headers: map[string]string{
-				"X-User-Id":    "123",
-				"X-User-Role":  "admin",
+				"X-User-Id":   "123",
+				"X-User-Role": "admin",
 			},
 			expectedStatus: http.StatusUnauthorized,
 		},

@@ -1,7 +1,7 @@
 package metrics
 
 import (
-	"github.com/13SOAT-andromeda/tech-challenge-s1/internal/domain"
+	"github.com/13SOAT-andromeda/tech-challenge-orders/internal/domain"
 )
 
 func orderStatusTag(s domain.Status) string {
