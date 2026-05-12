@@ -1,0 +1,26 @@
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: tech-challenge-api-hpa
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: tech-challenge-api
+  minReplicas: 1
+  maxReplicas: 5
+  metrics:
+    - type: Resource
+      resource:
+        name: cpu
+        target:
+          type: Utilization
+          averageUtilization: 70
+# Note: use only for tests to make scaling down faster
+#  behavior:
+#    scaleDown:
+#      stabilizationWindowSeconds: 5 # 5s (default 300s)
+#      policies:
+#        - type: Percent
+#          value: 100
+#          periodSeconds: 15

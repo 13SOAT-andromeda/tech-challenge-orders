@@ -1,0 +1,44 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+namespace: default
+
+resources:
+  - ../../base
+  - config.yaml
+  - ingress.yaml
+
+images:
+  - name: tech-challenge-api
+    newName: ECR_IMAGE
+
+secretGenerator:
+  - name: api-secrets
+    behavior: replace
+    envs:
+      - .env.secrets
+
+configMapGenerator:
+  - name: api-config
+    behavior: merge
+    envs:
+      - .env.host
+
+patches:
+  - target:
+      kind: Deployment
+      name: tech-challenge-api
+    patch: |-
+      - op: replace
+        path: /spec/template/spec/containers/0/imagePullPolicy
+        value: Always
+      - op: add
+        path: /spec/template/spec/containers/0/env
+        value:
+          - name: DD_AGENT_HOST
+            valueFrom:
+              fieldRef:
+                fieldPath: status.hostIP
+
+generatorOptions:
+   disableNameSuffixHash: true

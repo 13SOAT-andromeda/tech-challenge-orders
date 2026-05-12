@@ -1,0 +1,1107 @@
+swagger: "2.0"
+info:
+  title: "Tech Challenge S1 API"
+  version: "1.0.0"
+  description: "API for the Tech Challenge S1 project."
+host: "localhost:8080"
+schemes:
+  - http
+basePath: /api
+securityDefinitions:
+  Bearer:
+    type: apiKey
+    name: Authorization
+    in: header
+paths:
+  /health:
+    get:
+      summary: "Health check"
+      responses:
+        200:
+          description: "OK"
+          schema:
+            type: object
+            properties:
+              status:
+                type: string
+                example: ok
+  /customers:
+    get:
+      summary: "Search customers"
+      tags:
+        - Customer
+      security:
+        - Bearer: []
+      parameters:
+        - name: document
+          in: query
+          type: string
+        - name: name
+          in: query
+          type: string
+        - name: status
+          in: query
+          type: string
+        - name: email
+          in: query
+          type: string
+      responses:
+        200:
+          description: "A list of customers"
+          schema:
+            type: array
+            items:
+              $ref: "#/definitions/Customer"
+    post:
+      summary: "Create a new customer"
+      tags:
+        - Customer
+      security:
+        - Bearer: []
+      consumes:
+        - application/json
+      parameters:
+        - in: body
+          name: body
+          required: true
+          schema:
+            $ref: "#/definitions/CreateCustomerRequest"
+      responses:
+        201:
+          description: "Customer created successfully"
+  /customers/{id}:
+    get:
+      summary: "Get a customer by ID"
+      tags:
+        - Customer
+      security:
+        - Bearer: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          type: integer
+      responses:
+        200:
+          description: "Customer details"
+          schema:
+            $ref: "#/definitions/Customer"
+        404:
+          description: "Customer not found"
+    put:
+      summary: "Update a customer"
+      tags:
+        - Customer
+      security:
+        - Bearer: []
+      consumes:
+        - application/json
+      parameters:
+        - name: id
+          in: path
+          required: true
+          type: integer
+        - in: body
+          name: body
+          required: true
+          schema:
+            $ref: "#/definitions/CreateCustomerRequest"
+      responses:
+        200:
+          description: "Customer updated successfully"
+    delete:
+      summary: "Delete a customer"
+      tags:
+        - Customer
+      security:
+        - Bearer: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          type: integer
+      responses:
+        200:
+          description: "Customer deleted successfully"
+  /customers/{id}/vehicles:
+    get:
+      summary: "Get customer's vehicles"
+      tags:
+        - Customer
+      security:
+        - Bearer: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          type: integer
+      responses:
+        200:
+          description: "A list of vehicles"
+          schema:
+            type: array
+            items:
+              $ref: "#/definitions/Vehicle"
+  /customers/{id}/vehicles/{vehicleId}:
+    post:
+      summary: "Add a vehicle to a customer"
+      tags:
+        - Customer
+      security:
+        - Bearer: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          type: integer
+        - name: vehicleId
+          in: path
+          required: true
+          type: integer
+      responses:
+        201:
+          description: "Vehicle associated successfully"
+    delete:
+      summary: "Remove a vehicle from a customer"
+      tags:
+        - Customer
+      security:
+        - Bearer: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          type: integer
+        - name: vehicleId
+          in: path
+          required: true
+          type: integer
+      responses:
+        200:
+          description: "Vehicle removed successfully"
+  /companies:
+    post:
+      summary: "Create a new company"
+      tags:
+        - Company
+      security:
+        - Bearer: []
+      consumes:
+        - application/json
+      parameters:
+        - in: body
+          name: body
+          required: true
+          schema:
+            $ref: "#/definitions/CreateCompanyRequest"
+      responses:
+        201:
+          description: "Company created successfully"
+  /companies/{id}:
+    get:
+      summary: "Get a company by ID"
+      tags:
+        - Company
+      security:
+        - Bearer: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          type: integer
+      responses:
+        200:
+          description: "Company details"
+          schema:
+            $ref: "#/definitions/Company"
+        404:
+          description: "Company not found"
+    put:
+      summary: "Update a company"
+      tags:
+        - Company
+      security:
+        - Bearer: []
+      consumes:
+        - application/json
+      parameters:
+        - name: id
+          in: path
+          required: true
+          type: integer
+        - in: body
+          name: body
+          required: true
+          schema:
+            $ref: "#/definitions/CreateCompanyRequest"
+      responses:
+        200:
+          description: "Company updated successfully"
+    delete:
+      summary: "Delete a company"
+      tags:
+        - Company
+      security:
+        - Bearer: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          type: integer
+      responses:
+        200:
+          description: "Company deleted successfully"
+  /maintenances:
+    post:
+      summary: "Create a new maintenance service"
+      tags:
+        - Maintenance
+      security:
+        - Bearer: []
+      consumes:
+        - application/json
+      parameters:
+        - in: body
+          name: body
+          required: true
+          schema:
+            $ref: "#/definitions/CreateMaintenanceRequest"
+      responses:
+        201:
+          description: "Maintenance created successfully"
+  /maintenances/{id}:
+    get:
+      summary: "Get a maintenance service by ID"
+      tags:
+        - Maintenance
+      security:
+        - Bearer: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          type: integer
+      responses:
+        200:
+          description: "Maintenance details"
+          schema:
+            $ref: "#/definitions/Maintenance"
+    put:
+      summary: "Update a maintenance service"
+      tags:
+        - Maintenance
+      security:
+        - Bearer: []
+      consumes:
+        - application/json
+      parameters:
+        - name: id
+          in: path
+          required: true
+          type: integer
+        - in: body
+          name: body
+          required: true
+          schema:
+            $ref: "#/definitions/CreateMaintenanceRequest"
+      responses:
+        200:
+          description: "Maintenance updated successfully"
+    delete:
+      summary: "Delete a maintenance service"
+      tags:
+        - Maintenance
+      security:
+        - Bearer: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          type: integer
+      responses:
+        200:
+          description: "Maintenance deleted successfully"
+  /products:
+    post:
+      summary: "Create a new product"
+      tags:
+        - Product
+      security:
+        - Bearer: []
+      consumes:
+        - application/json
+      parameters:
+        - in: body
+          name: body
+          required: true
+          schema:
+            $ref: "#/definitions/CreateProductRequest"
+      responses:
+        201:
+          description: "Product created successfully"
+    get:
+      summary: "Get all products"
+      tags:
+        - Product
+      security:
+        - Bearer: []
+      responses:
+        200:
+          description: "A list of products"
+          schema:
+            type: array
+            items:
+              $ref: "#/definitions/Product"
+  /products/{id}:
+    get:
+      summary: "Get a product by ID"
+      tags:
+        - Product
+      security:
+        - Bearer: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          type: integer
+      responses:
+        200:
+          description: "Product details"
+          schema:
+            $ref: "#/definitions/Product"
+    put:
+      summary: "Update a product"
+      tags:
+        - Product
+      security:
+        - Bearer: []
+      consumes:
+        - application/json
+      parameters:
+        - name: id
+          in: path
+          required: true
+          type: integer
+        - in: body
+          name: body
+          required: true
+          schema:
+            $ref: "#/definitions/UpdateProductRequest"
+      responses:
+        200:
+          description: "Product updated successfully"
+    delete:
+      summary: "Delete a product"
+      tags:
+        - Product
+      security:
+        - Bearer: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          type: integer
+      responses:
+        200:
+          description: "Product deleted successfully"
+  /products/stock:
+    patch:
+      summary: "Update product stock in batch"
+      tags:
+        - Product
+      security:
+        - Bearer: []
+      consumes:
+        - application/json
+      parameters:
+        - in: body
+          name: body
+          required: true
+          schema:
+            $ref: "#/definitions/UpdateStockRequest"
+      responses:
+        200:
+          description: "Stock updated successfully"
+  /user:
+    get:
+      summary: "Get all users"
+      tags:
+        - User
+      security:
+        - Bearer: []
+      responses:
+        200:
+          description: "A list of users"
+          schema:
+            type: array
+            items:
+              $ref: "#/definitions/User"
+    post:
+      summary: "Create a new user"
+      tags:
+        - User
+      security:
+        - Bearer: []
+      consumes:
+        - application/json
+      parameters:
+        - in: body
+          name: body
+          required: true
+          schema:
+            $ref: "#/definitions/CreateUserRequest"
+      responses:
+        201:
+          description: "User created successfully"
+  /user/search:
+    get:
+      summary: "Search users"
+      tags:
+        - User
+      security:
+        - Bearer: []
+      responses:
+        200:
+          description: "A list of users"
+          schema:
+            type: array
+            items:
+              $ref: "#/definitions/User"
+  /user/{id}:
+    get:
+      summary: "Get a user by ID"
+      tags:
+        - User
+      security:
+        - Bearer: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          type: integer
+      responses:
+        200:
+          description: "User details"
+          schema:
+            $ref: "#/definitions/User"
+    put:
+      summary: "Update a user"
+      tags:
+        - User
+      security:
+        - Bearer: []
+      consumes:
+        - application/json
+      parameters:
+        - name: id
+          in: path
+          required: true
+          type: integer
+        - in: body
+          name: body
+          required: true
+          schema:
+            $ref: "#/definitions/UpdateUserRequest"
+      responses:
+        200:
+          description: "User updated successfully"
+    delete:
+      summary: "Delete a user"
+      tags:
+        - User
+      security:
+        - Bearer: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          type: integer
+      responses:
+        200:
+          description: "User deleted successfully"
+  /vehicles:
+    get:
+      summary: "Get all vehicles"
+      tags:
+        - Vehicle
+      security:
+        - Bearer: []
+      responses:
+        200:
+          description: "A list of vehicles"
+          schema:
+            type: array
+            items:
+              $ref: "#/definitions/Vehicle"
+    post:
+      summary: "Create a new vehicle"
+      tags:
+        - Vehicle
+      security:
+        - Bearer: []
+      consumes:
+        - application/json
+      parameters:
+        - in: body
+          name: body
+          required: true
+          schema:
+            $ref: "#/definitions/CreateVehicleRequest"
+      responses:
+        201:
+          description: "Vehicle created successfully"
+  /vehicles/{id}:
+    get:
+      summary: "Get a vehicle by ID"
+      tags:
+        - Vehicle
+      security:
+        - Bearer: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          type: integer
+      responses:
+        200:
+          description: "Vehicle details"
+          schema:
+            $ref: "#/definitions/Vehicle"
+    put:
+      summary: "Update a vehicle"
+      tags:
+        - Vehicle
+      security:
+        - Bearer: []
+      consumes:
+        - application/json
+      parameters:
+        - name: id
+          in: path
+          required: true
+          type: integer
+        - in: body
+          name: body
+          required: true
+          schema:
+            $ref: "#/definitions/UpdateVehicleRequest"
+      responses:
+        200:
+          description: "Vehicle updated successfully"
+    delete:
+      summary: "Delete a vehicle"
+      tags:
+        - Vehicle
+      security:
+        - Bearer: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          type: integer
+      responses:
+        200:
+          description: "Vehicle deleted successfully"
+  /orders:
+    get:
+      summary: "Get all orders"
+      tags:
+        - Order
+      security:
+        - Bearer: []
+      responses:
+        200:
+          description: "A list of orders"
+          schema:
+            type: array
+            items:
+              $ref: "#/definitions/Order"
+    post:
+      summary: "Create a new order"
+      tags:
+        - Order
+      security:
+        - Bearer: []
+      consumes:
+        - application/json
+      parameters:
+        - in: body
+          name: body
+          required: true
+          schema:
+            $ref: "#/definitions/CreateOrderRequest"
+      responses:
+        201:
+          description: "Order created successfully"
+  /orders/in-progress:
+    get:
+      summary: "Get in-progress orders"
+      tags:
+        - Order
+      security:
+        - Bearer: []
+      responses:
+        200:
+          description: "A list of in-progress orders"
+          schema:
+            type: array
+            items:
+              $ref: "#/definitions/Order"
+  /orders/{id}:
+    get:
+      summary: "Get an order by ID"
+      tags:
+        - Order
+      security:
+        - Bearer: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          type: integer
+      responses:
+        200:
+          description: "Order details"
+          schema:
+            $ref: "#/definitions/Order"
+    delete:
+      summary: "Delete an order"
+      tags:
+        - Order
+      security:
+        - Bearer: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          type: integer
+      responses:
+        200:
+          description: "Order deleted successfully"
+  /orders/{id}/assign:
+    post:
+      summary: "Assign an order to the current user"
+      tags:
+        - Order
+      security:
+        - Bearer: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          type: integer
+      responses:
+        200:
+          description: "Order assigned successfully"
+  /orders/{id}/complete-analysis:
+    post:
+      summary: "Complete the analysis of an order"
+      tags:
+        - Order
+      security:
+        - Bearer: []
+      consumes:
+        - application/json
+      parameters:
+        - name: id
+          in: path
+          required: true
+          type: integer
+        - in: body
+          name: body
+          required: true
+          schema:
+            $ref: "#/definitions/CompleteAnalysisRequest"
+      responses:
+        200:
+          description: "Order analysis completed successfully"
+  /orders/{id}/approve:
+    post:
+      summary: "Approve an order"
+      tags:
+        - Order
+      security:
+        - Bearer: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          type: integer
+      responses:
+        200:
+          description: "Order approved successfully"
+    get:
+      summary: "Approve an order (unauthenticated)"
+      tags:
+        - Order
+      parameters:
+        - name: id
+          in: path
+          required: true
+          type: integer
+      responses:
+        200:
+          description: "Order approved successfully"
+  /orders/{id}/reject:
+    post:
+      summary: "Reject an order"
+      tags:
+        - Order
+      security:
+        - Bearer: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          type: integer
+      responses:
+        200:
+          description: "Order rejected successfully"
+    get:
+      summary: "Reject an order (unauthenticated)"
+      tags:
+        - Order
+      parameters:
+        - name: id
+          in: path
+          required: true
+          type: integer
+      responses:
+        200:
+          description: "Order rejected successfully"
+  /orders/{id}/request-approval:
+    post:
+      summary: "Request approval for an order"
+      tags:
+        - Order
+      security:
+        - Bearer: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          type: integer
+      responses:
+        200:
+          description: "Approval notification sent successfully"
+  /orders/{id}/start-work:
+    post:
+      summary: "Start work on an order"
+      tags:
+        - Order
+      security:
+        - Bearer: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          type: integer
+      responses:
+        200:
+          description: "Work started successfully"
+  /orders/{id}/archive:
+    post:
+      summary: "Archive an order"
+      tags:
+        - Order
+      security:
+        - Bearer: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          type: integer
+      responses:
+        200:
+          description: "Order archived successfully"
+definitions:
+  CreateCustomerRequest:
+    type: object
+    properties:
+      name:
+        type: string
+      email:
+        type: string
+      document:
+        type: string
+      type:
+        type: string
+      contact:
+        type: string
+      address:
+        type: string
+      address_number:
+        type: string
+      city:
+        type: string
+      neighborhood:
+        type: string
+      country:
+        type: string
+      zip_code:
+        type: string
+  Customer:
+    type: object
+    properties:
+      id:
+        type: integer
+      name:
+        type: string
+      email:
+        type: string
+      document:
+        type: string
+      type:
+        type: string
+      contact:
+        type: string
+      address:
+        $ref: "#/definitions/Address"
+  Address:
+    type: object
+    properties:
+      address:
+        type: string
+      address_number:
+        type: string
+      city:
+        type: string
+      neighborhood:
+        type: string
+      country:
+        type: string
+      zip_code:
+        type: string
+  Vehicle:
+    type: object
+    properties:
+      id:
+        type: integer
+      name:
+        type: string
+      color:
+        type: string
+      brand:
+        type: string
+      plate:
+        type: string
+      year:
+        type: integer
+  CreateCompanyRequest:
+    type: object
+    properties:
+      name:
+        type: string
+      email:
+        type: string
+      document:
+        type: string
+      contact:
+        type: string
+      address:
+        type: string
+      address_number:
+        type: string
+      city:
+        type: string
+      neighborhood:
+        type: string
+      country:
+        type: string
+      zip_code:
+        type: string
+  Company:
+    type: object
+    properties:
+      id:
+        type: integer
+      name:
+        type: string
+      email:
+        type: string
+      document:
+        type: string
+      contact:
+        type: string
+      address:
+        $ref: "#/definitions/Address"
+  CreateMaintenanceRequest:
+    type: object
+    properties:
+      name:
+        type: string
+      price:
+        type: number
+      category:
+        type: string
+  Maintenance:
+    type: object
+    properties:
+      id:
+        type: integer
+      name:
+        type: string
+      price:
+        type: number
+      category_id:
+        type: string
+  CreateProductRequest:
+    type: object
+    properties:
+      name:
+        type: string
+      price:
+        type: integer
+      stock:
+        type: integer
+  UpdateProductRequest:
+    type: object
+    properties:
+      name:
+        type: string
+      price:
+        type: integer
+  Product:
+    type: object
+    properties:
+      id:
+        type: integer
+      name:
+        type: string
+      price:
+        type: integer
+      stock:
+        type: integer
+  UpdateStockRequest:
+    type: object
+    properties:
+      items:
+        type: array
+        items:
+          $ref: "#/definitions/StockItem"
+  StockItem:
+    type: object
+    properties:
+      id:
+        type: integer
+      quantity:
+        type: integer
+      operation:
+        type: string
+  CreateUserRequest:
+    type: object
+    properties:
+      name:
+        type: string
+      email:
+        type: string
+      password:
+        type: string
+      contact:
+        type: string
+      role:
+        type: string
+      address:
+        type: string
+      address_number:
+        type: string
+      city:
+        type: string
+      neighborhood:
+        type: string
+      country:
+        type: string
+      zip_code:
+        type: string
+  UpdateUserRequest:
+    type: object
+    properties:
+      name:
+        type: string
+      contact:
+        type: string
+      address:
+        type: string
+      address_number:
+        type: string
+      city:
+        type: string
+      neighborhood:
+        type: string
+      country:
+        type: string
+      zip_code:
+        type: string
+  User:
+    type: object
+    properties:
+      id:
+        type: integer
+      name:
+        type: string
+      email:
+        type: string
+      role:
+        type: string
+      contact:
+        type: string
+      active:
+        type: boolean
+      address:
+        $ref: "#/definitions/Address"
+  CreateVehicleRequest:
+    type: object
+    properties:
+      name:
+        type: string
+      color:
+        type: string
+      brand:
+        type: string
+      plate:
+        type: string
+      year:
+        type: integer
+  UpdateVehicleRequest:
+    type: object
+    properties:
+      name:
+        type: string
+      color:
+        type: string
+      brand:
+        type: string
+      plate:
+        type: string
+      year:
+        type: integer
+  CreateOrderRequest:
+    type: object
+    properties:
+      vehicle_kilometers:
+        type: integer
+      note:
+        type: string
+      customer_vehicle_id:
+        type: integer
+      company_id:
+        type: integer
+  CompleteAnalysisRequest:
+    type: object
+    properties:
+      diagnostic_note:
+        type: string
+      products:
+        type: array
+        items:
+          $ref: "#/definitions/StockItem"
+      maintenances:
+        type: array
+        items:
+          type: integer
+  Order:
+    type: object
+    properties:
+      id:
+        type: integer
+      # Add other order properties here based on your domain.Order struct

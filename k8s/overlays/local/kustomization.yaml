@@ -1,0 +1,34 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+namespace: default
+
+resources:
+  - ../../base
+  - ingress-nginx.yaml
+  - config.yaml
+  - postgres.yaml
+  - ingress.yaml
+
+patches:
+  - target:
+      kind: Deployment
+      name: tech-challenge-api
+    patch: |-
+      - op: replace
+        path: /spec/template/spec/containers/0/image
+        value: tech-challenge-api:latest
+      - op: replace
+        path: /spec/template/spec/containers/0/imagePullPolicy
+        value: Never
+  - target:
+      kind: DatadogAgent
+      name: datadog
+    patch: |-
+      - op: add
+        path: /spec/override/nodeAgent/env
+        value:
+          - name: DD_HOSTNAME
+            value: tech-challenge-local
+          - name: DD_KUBELET_TLS_VERIFY
+            value: "false"

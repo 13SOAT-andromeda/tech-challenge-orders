@@ -1,0 +1,6 @@
+init_config:
+
+instances:
+  - name: tech-challenge-api-health
+    url: http://app:8080/api/health
+    timeout: 5

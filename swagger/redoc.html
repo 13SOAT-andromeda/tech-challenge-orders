@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <title>Tech Challenge S1 API Docs</title>
+    <link rel="icon" href="logo.png" />
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Roboto, sans-serif;
+            background-color: #f8f9fa;
+        }
+        #redoc-container {
+            height: 100vh;
+        }
+
+        /* Estilos para elementos arredondados */
+        .redoc-wrap * {
+            border-radius: 8px !important;
+        }
+
+        /* Estilos para cabeçalhos e títulos */
+        .redoc-wrap h1,
+        .redoc-wrap h2,
+        .redoc-wrap h3,
+        .redoc-wrap h4,
+        .redoc-wrap h5 {
+            border-radius: 8px !important;
+        }
+
+        /* Estilos para botões */
+        .redoc-wrap button {
+            border-radius: 6px !important;
+        }
+
+        /* Estilos para cards e painéis */
+        .redoc-wrap .api-content,
+        .redoc-wrap .operation-content,
+        .redoc-wrap .model-box {
+            border-radius: 10px !important;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1) !important;
+        }
+    </style>
+</head>
+<body>
+<redoc
+        spec-url="/swagger/swagger.yaml"
+        theme='{
+        "colors": {
+          "primary": {
+            "main": "#6f42c1",
+            "light": "#8c68d6",
+            "dark": "#5a2d9c"
+          },
+          "text": {
+            "primary": "#2d1b69",
+            "secondary": "#4a3b8c"
+          },
+          "http": {
+            "get": "#8c68d6",
+            "post": "#6f42c1",
+            "put": "#9f7aea",
+            "delete": "#a855f7"
+          },
+          "gray": {
+            "50": "#f8f9fa",
+            "100": "#e9ecef"
+          }
+        },
+        "typography": {
+          "fontFamily": "Segoe UI, Roboto, sans-serif",
+          "fontSize": "15px",
+          "headings": {
+            "fontWeight": "600",
+            "color": "#2d1b69"
+          }
+        },
+        "sidebar": {
+          "width": "300px",
+          "backgroundColor": "#f5f3ff",
+          "textColor": "#2d1b69",
+          "activeTextColor": "#6f42c1",
+          "groupItems": {
+            "textTransform": "uppercase",
+            "fontWeight": "600"
+          }
+        },
+        "rightPanel": {
+          "backgroundColor": "#f5f3ff",
+          "textColor": "#2d1b69"
+        },
+        "codeBlock": {
+          "backgroundColor": "#f5f3ff"
+        },
+        "shape": {
+          "borderRadius": "8px"
+        }
+      }'
+></redoc>
+<script src="https://cdn.redoc.ly/redoc/latest/bundles/redoc.standalone.js"></script>
+</body>
+</html>

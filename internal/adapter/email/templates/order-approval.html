@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title>Ordem de Serviço - Aprovação</title>
+    <!--[if mso]>
+    <style type="text/css">
+        body, table, td {font-family: Arial, sans-serif !important;}
+    </style>
+    <![endif]-->
+</head>
+<body style="margin: 0; padding: 0; background-color: #f4f4f4; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;">
+    <!-- Main Container -->
+    <table role="presentation" style="width: 100%; border-collapse: collapse; margin: 0; padding: 0; background-color: #f4f4f4;">
+        <tr>
+            <td align="center" style="padding: 20px 0;">
+                <!-- Email Container -->
+                <table role="presentation" style="width: 100%; max-width: 600px; border-collapse: collapse; background-color: #ffffff; border-radius: 8px; overflow: hidden; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+                    <!-- Header -->
+                    <tr>
+                        <td style="background-color: #2563eb; padding: 30px 40px; text-align: center;">
+                            <h1 style="margin: 0; color: #ffffff; font-size: 24px; font-weight: 600; line-height: 1.4;">
+                                Oficina Automotiva
+                            </h1>
+                        </td>
+                    </tr>
+                    
+                    <!-- Content -->
+                    <tr>
+                        <td style="padding: 40px 40px 30px;">
+                            <!-- Greeting -->
+                            <p style="margin: 0 0 20px 0; color: #1f2937; font-size: 16px; line-height: 1.6;">
+                                Olá <strong style="color: #2563eb;">$Name</strong>,
+                            </p>
+                            
+                            <p style="margin: 0 0 30px 0; color: #4b5563; font-size: 16px; line-height: 1.6;">
+                                Finalizamos o diagnóstico da ordem de serviço <strong>$ID</strong>. Sinalize abaixo se você aprova ou reprova o orçamento.
+                            </p>
+                            
+                            <!-- Order Information Card -->
+                            <table role="presentation" style="width: 100%; border-collapse: collapse; margin: 0 0 30px 0; background-color: #f9fafb; border-radius: 6px; overflow: hidden; border: 1px solid #e5e7eb;">
+                                <tr>
+                                    <td style="padding: 20px;">
+                                        <table role="presentation" style="width: 100%; border-collapse: collapse;">
+                                            <!-- Order ID -->
+                                            <tr>
+                                                <td style="padding: 8px 0; border-bottom: 1px solid #e5e7eb;">
+                                                    <span style="color: #6b7280; font-size: 14px; font-weight: 500; display: inline-block; width: 140px;">ID:</span>
+                                                    <span style="color: #1f2937; font-size: 14px; font-weight: 600;">$ID</span>
+                                                </td>
+                                            </tr>
+                                            
+                                            <!-- Date In -->
+                                            <tr>
+                                                <td style="padding: 8px 0; border-bottom: 1px solid #e5e7eb;">
+                                                    <span style="color: #6b7280; font-size: 14px; font-weight: 500; display: inline-block; width: 140px;">Data de entrada:</span>
+                                                    <span style="color: #1f2937; font-size: 14px;">$DateIn</span>
+                                                </td>
+                                            </tr>                                          
+                                            
+                                            <!-- Services and Products -->
+                                            <!-- <tr>
+                                                <td style="padding: 8px 0; border-bottom: 1px solid #e5e7eb;">
+                                                    <div style="margin-bottom: 8px;">
+                                                        <span style="color: #6b7280; font-size: 14px; font-weight: 500; display: block; margin-bottom: 8px;">Serviços e produtos:</span>
+                                                        <div style="color: #1f2937; font-size: 14px; line-height: 1.6;">
+                                                            $list_services_products
+                                                        </div>
+                                                    </div>
+                                                </td>
+                                            </tr>-->
+                                            
+                                            <!-- Total Value -->
+                                            <tr>
+                                                <td style="padding: 8px 0; border-bottom: 1px solid #e5e7eb;">
+                                                    <span style="color: #6b7280; font-size: 14px; font-weight: 500; display: inline-block; width: 140px;">Valor total:</span>
+                                                    <span style="color: #059669; font-size: 16px; font-weight: 700;">$Value</span>
+                                                </td>
+                                            </tr>
+
+                                            <!-- Diagnostic Note -->
+                                            <tr>
+                                                <td style="padding: 8px 0; border-bottom: 1px solid #e5e7eb;">
+                                                    <div style="margin-bottom: 8px;">
+                                                        <span style="color: #6b7280; font-size: 14px; font-weight: 500; display: block; margin-bottom: 4px;">Diagnóstico:</span>
+                                                        <span style="color: #1f2937; font-size: 14px; line-height: 1.5; display: block;">$DiagnosticNote</span>
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                            
+                                            <!-- Note -->
+                                            <tr>
+                                                <td style="padding: 8px 0;">
+                                                    <div>
+                                                        <span style="color: #6b7280; font-size: 14px; font-weight: 500; display: block; margin-bottom: 4px;">Observações:</span>
+                                                        <span style="color: #1f2937; font-size: 14px; line-height: 1.5; display: block;">$Note</span>
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                        </table>
+                                    </td>
+                                </tr>
+                            </table>
+                            
+                            <!-- Action Buttons -->
+                            <table role="presentation" style="width: 100%; border-collapse: collapse; margin: 0 0 30px 0;">
+                                <tr>
+                                    <td align="center" style="padding: 0 0 15px 0;">
+                                        <!-- Approve Button -->
+                                        <a href="$Approval_url" style="display: inline-block; padding: 14px 32px; background-color: #059669; color: #ffffff; text-decoration: none; border-radius: 6px; font-size: 16px; font-weight: 600; text-align: center; line-height: 1.5; box-shadow: 0 2px 4px rgba(5, 150, 105, 0.3);">
+                                            ✓ Aprovar
+                                        </a>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td align="center" style="padding: 0;">
+                                        <!-- Reject Button -->
+                                        <a href="$Repprove_url" style="display: inline-block; padding: 14px 32px; background-color: #dc2626; color: #ffffff; text-decoration: none; border-radius: 6px; font-size: 16px; font-weight: 600; text-align: center; line-height: 1.5; box-shadow: 0 2px 4px rgba(220, 38, 38, 0.3);">
+                                            ✗ Reprovar
+                                        </a>
+                                    </td>
+                                </tr>
+                            </table>
+                        </td>
+                    </tr>
+                    
+                    <!-- Footer -->
+                    <tr>
+                        <td style="background-color: #f9fafb; padding: 20px 40px; text-align: center; border-top: 1px solid #e5e7eb;">
+                            <p style="margin: 0; color: #6b7280; font-size: 12px; line-height: 1.5;">
+                                Este é um e-mail automático. Por favor, não responda este e-mail.
+                            </p>
+                        </td>
+                    </tr>
+                </table>
+            </td>
+        </tr>
+    </table>
+</body>
+</html>
+
+
+
