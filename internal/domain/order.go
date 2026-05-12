@@ -22,9 +22,9 @@ type Order struct {
 	Note              *string       `json:"note"`
 	DiagnosticNote    *string       `json:"diagnostic_note"`
 	Price             *float64      `json:"price"`
-	CustomerVehicleID uint          `json:"customer_vehicle_id"`
-	EmployeeID        uint          `json:"employee_id"`
-	CompanyID         uint          `json:"company_id"`
+	CustomerVehicleID string        `json:"customer_vehicle_id"`
+	EmployeeID        string        `json:"employee_id"`
+	CompanyID         string        `json:"company_id"`
 	Vehicle           *Vehicle      `json:"vehicle,omitempty"`
 	Items             *[]OrderItems `json:"items,omitempty"`
 }
