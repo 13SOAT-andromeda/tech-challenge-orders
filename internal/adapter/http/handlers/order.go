@@ -2,36 +2,38 @@ package handlers
 
 import (
 	"net/http"
-	"strconv"
 
 	"github.com/13SOAT-andromeda/tech-challenge-orders/internal/adapter/http/middlewares"
 	"github.com/13SOAT-andromeda/tech-challenge-orders/internal/adapter/http/response"
 	"github.com/13SOAT-andromeda/tech-challenge-orders/internal/application/ports"
 	"github.com/13SOAT-andromeda/tech-challenge-orders/internal/domain"
-	"github.com/13SOAT-andromeda/tech-challenge-orders/pkg/converters"
 	"github.com/gin-gonic/gin"
 )
 
 type OrderHandler struct {
-	service ports.OrderService
 	usecase ports.OrderUseCase
 }
 
-func NewOrderHandler(service ports.OrderService, usecase ports.OrderUseCase) *OrderHandler {
-	return &OrderHandler{service: service, usecase: usecase}
+func NewOrderHandler(usecase ports.OrderUseCase) *OrderHandler {
+	return &OrderHandler{usecase: usecase}
 }
 
 type CreateOrderRequest struct {
 	VehicleKilometers int     `json:"vehicle_kilometers" binding:"required"`
 	Note              *string `json:"note"`
-	CustomerVehicleID uint    `json:"customer_vehicle_id" binding:"required"`
-	CompanyID         uint    `json:"company_id" binding:"required"`
+	CustomerVehicleID string  `json:"customer_vehicle_id" binding:"required"`
+	CompanyID         string  `json:"company_id" binding:"required"`
+}
+
+type StockItemRequest struct {
+	ID       string `json:"id" binding:"required"`
+	Quantity uint   `json:"quantity" binding:"required"`
 }
 
 type CompleteAnalysisRequest struct {
 	DiagnosticNote string             `json:"diagnostic_note"`
-	Products       []domain.StockItem `json:"products" binding:"required"`
-	Maintenances   []uint             `json:"maintenances" binding:"required"`
+	Products       []StockItemRequest `json:"products" binding:"required"`
+	Maintenances   []string           `json:"maintenances" binding:"required"`
 }
 
 func (h *OrderHandler) Create(ctx *gin.Context) {
@@ -41,15 +43,9 @@ func (h *OrderHandler) Create(ctx *gin.Context) {
 		return
 	}
 
-	userIdStr := middlewares.GetUserID(ctx)
-	if userIdStr == "" {
+	userID := middlewares.GetUserID(ctx)
+	if userID == "" {
 		response.RespondError(ctx, http.StatusUnauthorized, "User ID not found in context")
-		return
-	}
-
-	userId, err := strconv.ParseUint(userIdStr, 10, 64)
-	if err != nil {
-		response.RespondError(ctx, http.StatusUnauthorized, "Invalid User ID format")
 		return
 	}
 
@@ -60,7 +56,7 @@ func (h *OrderHandler) Create(ctx *gin.Context) {
 		CompanyID:         request.CompanyID,
 	}
 
-	created, err := h.usecase.CreateOrder(ctx.Request.Context(), uint(userId), input)
+	created, err := h.usecase.CreateOrder(ctx.Request.Context(), userID, input)
 	if err != nil {
 		response.RespondError(ctx, http.StatusInternalServerError, err.Error())
 		return
@@ -70,25 +66,14 @@ func (h *OrderHandler) Create(ctx *gin.Context) {
 }
 
 func (h *OrderHandler) Assign(ctx *gin.Context) {
-	orderID, err := strconv.Atoi(ctx.Param("id"))
-	if err != nil {
-		response.RespondError(ctx, http.StatusBadRequest, err.Error())
-		return
-	}
-
-	userIdStr := middlewares.GetUserID(ctx)
-	if userIdStr == "" {
+	orderID := ctx.Param("id")
+	userID := middlewares.GetUserID(ctx)
+	if userID == "" {
 		response.RespondError(ctx, http.StatusUnauthorized, "User ID not found in context")
 		return
 	}
 
-	userId, err := strconv.ParseUint(userIdStr, 10, 64)
-	if err != nil {
-		response.RespondError(ctx, http.StatusUnauthorized, "Invalid User ID format")
-		return
-	}
-
-	if err := h.usecase.AssignOrder(ctx.Request.Context(), uint(orderID), uint(userId)); err != nil {
+	if err := h.usecase.AssignOrder(ctx.Request.Context(), orderID, userID); err != nil {
 		response.RespondError(ctx, http.StatusInternalServerError, err.Error())
 		return
 	}
@@ -97,21 +82,11 @@ func (h *OrderHandler) Assign(ctx *gin.Context) {
 }
 
 func (h *OrderHandler) CompleteAnalysis(ctx *gin.Context) {
-	orderID, err := strconv.Atoi(ctx.Param("id"))
-	if err != nil {
-		response.RespondError(ctx, http.StatusBadRequest, err.Error())
-		return
-	}
+	orderID := ctx.Param("id")
 
-	userIdStr := middlewares.GetUserID(ctx)
-	if userIdStr == "" {
+	userID := middlewares.GetUserID(ctx)
+	if userID == "" {
 		response.RespondError(ctx, http.StatusUnauthorized, "User ID not found in context")
-		return
-	}
-
-	userId, err := strconv.ParseUint(userIdStr, 10, 64)
-	if err != nil {
-		response.RespondError(ctx, http.StatusUnauthorized, "Invalid User ID format")
 		return
 	}
 
@@ -121,13 +96,18 @@ func (h *OrderHandler) CompleteAnalysis(ctx *gin.Context) {
 		return
 	}
 
+	products := make([]domain.StockItem, 0, len(request.Products))
+	for _, p := range request.Products {
+		products = append(products, domain.StockItem{ID: p.ID, Quantity: p.Quantity})
+	}
+
 	input := ports.CreateCompleteOrderAnalysisInput{
 		DiagnosticNote: &request.DiagnosticNote,
-		Products:       request.Products,
+		Products:       products,
 		Maintenances:   request.Maintenances,
 	}
 
-	if err := h.usecase.CompleteOrderAnalysis(ctx.Request.Context(), uint(orderID), uint(userId), input); err != nil {
+	if err := h.usecase.CompleteOrderAnalysis(ctx.Request.Context(), orderID, userID, input); err != nil {
 		response.RespondError(ctx, http.StatusInternalServerError, err.Error())
 		return
 	}
@@ -135,160 +115,81 @@ func (h *OrderHandler) CompleteAnalysis(ctx *gin.Context) {
 	response.RespondSuccess(ctx, "", "Order analysis completed successfully")
 }
 
-func (h *OrderHandler) GetAll(ctx *gin.Context) {
-	u := ctx.Request.URL.Query()
-	params := converters.ParamsToMap(u)
+// GetAll, GetByID, Delete and GetInProgress will be re-implemented in Fase 7
+// using DynamoDB repository queries directly from use cases.
 
-	orders, err := h.service.GetAll(ctx.Request.Context(), params)
-	if err != nil {
-		response.RespondError(ctx, http.StatusInternalServerError, err.Error())
-		return
-	}
-	response.RespondSuccess(ctx, orders, "")
+func (h *OrderHandler) GetAll(ctx *gin.Context) {
+	response.RespondError(ctx, http.StatusNotImplemented, "not implemented yet")
 }
 
 func (h *OrderHandler) GetByID(ctx *gin.Context) {
-	id, err := strconv.Atoi(ctx.Param("id"))
-	if err != nil {
-		response.RespondError(ctx, http.StatusBadRequest, err.Error())
-		return
-	}
-
-	order, err := h.service.GetByID(ctx.Request.Context(), uint(id))
-	if err != nil {
-		response.RespondError(ctx, http.StatusInternalServerError, err.Error())
-		return
-	}
-
-	if order == nil {
-		response.RespondError(ctx, http.StatusNotFound, "Order not found")
-		return
-	}
-	response.RespondSuccess(ctx, order, "")
+	response.RespondError(ctx, http.StatusNotImplemented, "not implemented yet")
 }
 
 func (h *OrderHandler) Delete(ctx *gin.Context) {
-	id, err := strconv.Atoi(ctx.Param("id"))
-	if err != nil {
-		response.RespondError(ctx, http.StatusBadRequest, err.Error())
-		return
-	}
-
-	if err := h.service.Delete(ctx.Request.Context(), uint(id)); err != nil {
-		response.RespondError(ctx, http.StatusInternalServerError, err.Error())
-		return
-	}
-
-	response.RespondSuccess(ctx, id, "Order deleted successfully")
-}
-
-func (h *OrderHandler) ApproveOrder(ctx *gin.Context) {
-	id, err := strconv.Atoi(ctx.Param("id"))
-
-	if err != nil {
-		response.RespondError(ctx, http.StatusBadRequest, err.Error())
-		return
-	}
-
-	if err := h.usecase.ApproveOrder(ctx.Request.Context(), uint(id)); err != nil {
-		response.RespondError(ctx, http.StatusInternalServerError, err.Error())
-		return
-	}
-
-	response.RespondSuccess(ctx, id, "Order approved successfully")
-}
-
-func (h *OrderHandler) RejectOrder(ctx *gin.Context) {
-	id, err := strconv.Atoi(ctx.Param("id"))
-
-	if err != nil {
-		response.RespondError(ctx, http.StatusBadRequest, err.Error())
-		return
-	}
-
-	if err := h.usecase.RejectOrder(ctx.Request.Context(), uint(id)); err != nil {
-		response.RespondError(ctx, http.StatusInternalServerError, err.Error())
-		return
-	}
-
-	response.RespondSuccess(ctx, id, "Order rejected successfully")
-}
-
-func (h *OrderHandler) RequestApproval(ctx *gin.Context) {
-	id, err := strconv.Atoi(ctx.Param("id"))
-
-	if err != nil {
-		response.RespondError(ctx, http.StatusBadRequest, err.Error())
-		return
-	}
-
-	if err := h.usecase.RequestApproval(ctx.Request.Context(), uint(id)); err != nil {
-		response.RespondError(ctx, http.StatusInternalServerError, err.Error())
-		return
-	}
-
-	response.RespondSuccess(ctx, id, "Approval notification sent successfully")
-}
-
-func (h *OrderHandler) ArchiveOrder(ctx *gin.Context) {
-	id, err := strconv.Atoi(ctx.Param("id"))
-
-	if err != nil {
-		response.RespondError(ctx, http.StatusBadRequest, err.Error())
-		return
-	}
-
-	if err := h.usecase.ArchiveOrder(ctx.Request.Context(), uint(id)); err != nil {
-		response.RespondError(ctx, http.StatusInternalServerError, err.Error())
-		return
-	}
-
-	response.RespondSuccess(ctx, id, "Order archived successfully")
-}
-
-func (h *OrderHandler) StartWork(ctx *gin.Context) {
-	id, err := strconv.Atoi(ctx.Param("id"))
-	if err != nil {
-		response.RespondError(ctx, http.StatusBadRequest, err.Error())
-		return
-	}
-
-	if err = h.usecase.StartWorkOrder(ctx.Request.Context(), uint(id)); err != nil {
-		response.RespondError(ctx, http.StatusInternalServerError, err.Error())
-		return
-	}
-
-	response.RespondSuccess(ctx, id, "Work started successfully")
+	response.RespondError(ctx, http.StatusGone, "order deletion is not supported")
 }
 
 func (h *OrderHandler) GetInProgress(ctx *gin.Context) {
-	u := ctx.Request.URL.Query()
+	response.RespondError(ctx, http.StatusNotImplemented, "not implemented yet")
+}
 
-	u.Add("sortdesc", "false")
-	u.Add("orderby", "date_approved")
-	u.Add("status", string(domain.OrderStatuses.IN_PROGRESS))
+func (h *OrderHandler) ApproveOrder(ctx *gin.Context) {
+	orderID := ctx.Param("id")
 
-	params := converters.ParamsToMap(u)
-
-	orders, err := h.service.GetAll(ctx.Request.Context(), params)
-	if err != nil {
+	if err := h.usecase.ApproveOrder(ctx.Request.Context(), orderID); err != nil {
 		response.RespondError(ctx, http.StatusInternalServerError, err.Error())
 		return
 	}
-	response.RespondSuccess(ctx, orders, "")
+
+	response.RespondSuccess(ctx, orderID, "Order approved successfully")
+}
+
+func (h *OrderHandler) RejectOrder(ctx *gin.Context) {
+	orderID := ctx.Param("id")
+
+	if err := h.usecase.RejectOrder(ctx.Request.Context(), orderID); err != nil {
+		response.RespondError(ctx, http.StatusInternalServerError, err.Error())
+		return
+	}
+
+	response.RespondSuccess(ctx, orderID, "Order rejected successfully")
+}
+
+func (h *OrderHandler) RequestApproval(ctx *gin.Context) {
+	orderID := ctx.Param("id")
+
+	if err := h.usecase.RequestApproval(ctx.Request.Context(), orderID); err != nil {
+		response.RespondError(ctx, http.StatusInternalServerError, err.Error())
+		return
+	}
+
+	response.RespondSuccess(ctx, orderID, "Approval notification sent successfully")
+}
+
+func (h *OrderHandler) ArchiveOrder(ctx *gin.Context) {
+	orderID := ctx.Param("id")
+
+	if err := h.usecase.ArchiveOrder(ctx.Request.Context(), orderID); err != nil {
+		response.RespondError(ctx, http.StatusInternalServerError, err.Error())
+		return
+	}
+
+	response.RespondSuccess(ctx, orderID, "Order archived successfully")
+}
+
+// StartWork is removed — stock decrement is triggered via stock.available event after approve.
+func (h *OrderHandler) StartWork(ctx *gin.Context) {
+	response.RespondError(ctx, http.StatusGone, "start-work is no longer available; stock is managed via events")
 }
 
 func (h *OrderHandler) CompleteWork(ctx *gin.Context) {
-	id, err := strconv.Atoi(ctx.Param("id"))
-	if err != nil {
-		response.RespondError(ctx, http.StatusBadRequest, err.Error())
-		return
-	}
+	orderID := ctx.Param("id")
 
-	if err = h.usecase.CompleteWorkOrder(ctx.Request.Context(), uint(id)); err != nil {
+	if err := h.usecase.CompleteWorkOrder(ctx.Request.Context(), orderID); err != nil {
 		response.RespondError(ctx, http.StatusInternalServerError, err.Error())
 		return
 	}
 
-	response.RespondSuccess(ctx, id, "Work completed successfully")
+	response.RespondSuccess(ctx, orderID, "Work completed successfully")
 }

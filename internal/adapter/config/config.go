@@ -9,19 +9,15 @@ import (
 )
 
 type Config struct {
-	Database  *DataBaseConfig
 	Http      *HttpConfig
+	DynamoDB  *DynamoDBConfig
+	SNS       *SNSConfig
+	SQS       *SQSConfig
+	Clients   *HTTPClientsConfig
+	DogStatsD *DogStatsDConfig
 	Env       string
 	Version   string
 	Service   string
-	AdminUser *AdminUserConfig
-	MailTrap  *MailTrapConfig
-	DogStatsD *DogStatsDConfig
-}
-
-type DogStatsDConfig struct {
-	Addr     string
-	Disabled bool
 }
 
 type HttpConfig struct {
@@ -29,54 +25,67 @@ type HttpConfig struct {
 	Port           string
 	Url            string
 	ApiUrl         string
+	PublicBaseURL  string
 }
 
-type DataBaseConfig struct {
-	Host     string
-	User     string
-	Password string
-	DBName   string
-	Port     string
-	SSLMode  string
-	TimeZone string
+type DynamoDBConfig struct {
+	Region    string
+	Endpoint  string
+	TableName string
 }
 
-type MailTrapConfig struct {
-	ApiKey string
-	ApiUrl string
+type SNSConfig struct {
+	OrdersTopicARN string
 }
 
-type AdminUserConfig struct {
-	Email    string
-	Password string
-	Document string
+type SQSConfig struct {
+	StockAvailableURL   string
+	StockUnavailableURL string
+	StockUpdatedURL     string
+	PaymentGeneratedURL string
+	PaymentApprovedURL  string
+	PaymentFailedURL    string
+}
+
+type HTTPClientsConfig struct {
+	UsersBaseURL string
+	StockBaseURL string
+	TimeoutMs    int
+}
+
+type DogStatsDConfig struct {
+	Addr     string
+	Disabled bool
 }
 
 func getEnv(key, defaultValue string) string {
 	if value, exists := os.LookupEnv(key); exists {
 		return value
 	}
-
 	return defaultValue
+}
+
+func getEnvInt(key string, defaultValue int) int {
+	v := getEnv(key, "")
+	if v == "" {
+		return defaultValue
+	}
+	n := 0
+	for _, c := range v {
+		if c < '0' || c > '9' {
+			return defaultValue
+		}
+		n = n*10 + int(c-'0')
+	}
+	return n
 }
 
 func Init() (*Config, error) {
 	_ = godotenv.Load()
 
-	database := &DataBaseConfig{
-		Host:     getEnv("DB_HOST", "localhost"),
-		User:     getEnv("DB_USER", "postgres"),
-		Password: getEnv("DB_PASSWORD", "password"),
-		DBName:   getEnv("DB_NAME", "postgres"),
-		Port:     getEnv("DB_PORT", "5432"),
-		SSLMode:  getEnv("DB_SSLMODE", "disable"),
-		TimeZone: getEnv("DB_TIMEZONE", "UTC"),
-	}
-
 	var allowedOriginList []string
-
 	allowedOrigins := getEnv("HTTP_ALLOWED_ORIGINS", "*")
-	if allowedOrigins == "*" && len(allowedOrigins) > 0 {
+	if allowedOrigins != "*" && len(allowedOrigins) > 0 {
 		allowedOriginList = strings.Split(allowedOrigins, ",")
 	}
 
@@ -85,20 +94,34 @@ func Init() (*Config, error) {
 		Port:           getEnv("HTTP_PORT", "8080"),
 		Url:            getEnv("HTTP_URL", "http://localhost"),
 		ApiUrl:         getEnv("API_URL", "http://localhost"),
+		PublicBaseURL:  getEnv("PUBLIC_BASE_URL", "http://localhost:8080"),
 	}
 
-	adminUser := &AdminUserConfig{
-		Email:    getEnv("ADMIN_EMAIL", ""),
-		Password: getEnv("ADMIN_PASSWORD", ""),
-		Document: getEnv("ADMIN_DOCUMENT", ""),
+	dynamoDB := &DynamoDBConfig{
+		Region:    getEnv("AWS_REGION", "us-east-1"),
+		Endpoint:  getEnv("DYNAMODB_ENDPOINT", ""),
+		TableName: getEnv("DYNAMODB_TABLE", "orders"),
 	}
 
-	mailTrap := &MailTrapConfig{
-		ApiKey: getEnv("MAILTRAP_TOKEN", ""),
-		ApiUrl: getEnv("MAILTRAP_URL", ""),
+	sns := &SNSConfig{
+		OrdersTopicARN: getEnv("ORDERS_TOPIC_ARN", ""),
 	}
 
-	// DogStatsD na porta 8125 do mesmo host que o Agent (DD_AGENT_HOST). Sem host, métricas desligadas.
+	sqs := &SQSConfig{
+		StockAvailableURL:   getEnv("SQS_STOCK_AVAILABLE_URL", ""),
+		StockUnavailableURL: getEnv("SQS_STOCK_UNAVAILABLE_URL", ""),
+		StockUpdatedURL:     getEnv("SQS_STOCK_UPDATED_URL", ""),
+		PaymentGeneratedURL: getEnv("SQS_PAYMENT_GENERATED_URL", ""),
+		PaymentApprovedURL:  getEnv("SQS_PAYMENT_APPROVED_URL", ""),
+		PaymentFailedURL:    getEnv("SQS_PAYMENT_FAILED_URL", ""),
+	}
+
+	clients := &HTTPClientsConfig{
+		UsersBaseURL: getEnv("USERS_BASE_URL", "http://localhost:8081"),
+		StockBaseURL: getEnv("STOCK_BASE_URL", "http://localhost:8082"),
+		TimeoutMs:    getEnvInt("HTTP_CLIENT_TIMEOUT_MS", 2000),
+	}
+
 	agentHost := getEnv("DD_AGENT_HOST", "")
 	dogstatsdAddr := ""
 	dogstatsdDisabled := true
@@ -107,17 +130,15 @@ func Init() (*Config, error) {
 		dogstatsdDisabled = false
 	}
 
-	serviceName := getEnv("DD_SERVICE", "tech-challenge-api")
-	version := getEnv("API_VERSION", "1.0.0")
-
 	return &Config{
-		Database:  database,
-		Http:      http,
-		Env:       getEnv("ENV", "development"),
-		Version:   version,
-		Service:   serviceName,
-		AdminUser: adminUser,
-		MailTrap:  mailTrap,
+		Http:     http,
+		DynamoDB: dynamoDB,
+		SNS:      sns,
+		SQS:      sqs,
+		Clients:  clients,
+		Env:      getEnv("ENV", "development"),
+		Version:  getEnv("API_VERSION", "1.0.0"),
+		Service:  getEnv("DD_SERVICE", "tech-challenge-api"),
 		DogStatsD: &DogStatsDConfig{
 			Addr:     dogstatsdAddr,
 			Disabled: dogstatsdDisabled,

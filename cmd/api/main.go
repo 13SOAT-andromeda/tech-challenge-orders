@@ -12,20 +12,15 @@ import (
 	"go.uber.org/zap"
 
 	"github.com/13SOAT-andromeda/tech-challenge-orders/internal/adapter/config"
-	"github.com/13SOAT-andromeda/tech-challenge-orders/internal/adapter/database"
-	"github.com/13SOAT-andromeda/tech-challenge-orders/internal/adapter/database/model/order"
-	"github.com/13SOAT-andromeda/tech-challenge-orders/internal/adapter/database/repository"
-	"github.com/13SOAT-andromeda/tech-challenge-orders/internal/adapter/email"
+	"github.com/13SOAT-andromeda/tech-challenge-orders/internal/adapter/dynamo"
+	dynamorepo "github.com/13SOAT-andromeda/tech-challenge-orders/internal/adapter/dynamo/repository"
 	"github.com/13SOAT-andromeda/tech-challenge-orders/internal/adapter/http"
 	"github.com/13SOAT-andromeda/tech-challenge-orders/internal/adapter/http/handlers"
 	appmetrics "github.com/13SOAT-andromeda/tech-challenge-orders/internal/adapter/metrics"
 	"github.com/13SOAT-andromeda/tech-challenge-orders/internal/application/ports"
-	"github.com/13SOAT-andromeda/tech-challenge-orders/internal/application/services"
-	orderUsecase "github.com/13SOAT-andromeda/tech-challenge-orders/internal/application/usecases/order"
 )
 
 func main() {
-
 	logger, err := zap.NewProduction()
 
 	defer func() {
@@ -55,7 +50,6 @@ func main() {
 			profiler.HeapProfile,
 		),
 	)
-
 	if err != nil {
 		sugar.Fatalf("Error on start datadog profiler: %s", err)
 	}
@@ -65,33 +59,22 @@ func main() {
 		tracer.WithService(cfg.Service),
 		tracer.WithServiceVersion(cfg.Version),
 	)
-
 	if err != nil {
 		sugar.Fatalf("Error on start datadog tracer: %s", err)
 	}
 
 	ctx := context.Background()
-	db, err := database.Init(ctx, *cfg.Database)
+
+	dynamoClient, err := dynamo.NewClient(ctx, dynamo.Config{
+		Region:    cfg.DynamoDB.Region,
+		Endpoint:  cfg.DynamoDB.Endpoint,
+		TableName: cfg.DynamoDB.TableName,
+	})
 	if err != nil {
-		sugar.Fatalf("failed to connect database: %v", err)
+		sugar.Fatalf("failed to connect to DynamoDB: %v", err)
 	}
 
-	sugar.Infof("Connecting to database")
-
-	err = db.AutoMigrate(
-		&order.Model{},
-	)
-
-	if err != nil {
-		sugar.Fatalf("Error to executing migration: %s", err)
-	}
-
-	dbase := db.GetDB()
-
-	if err = database.Seed(dbase); err != nil {
-		sugar.Fatalf("failed to seed database: %v", err)
-	}
-	apiUrl := cfg.Http.ApiUrl
+	_ = dynamorepo.NewOrderRepository(dynamoClient, cfg.DynamoDB.TableName)
 
 	var orderMetrics ports.OrderMetrics = appmetrics.NoopOrderMetrics{}
 	if !cfg.DogStatsD.Disabled && cfg.DogStatsD.Addr != "" {
@@ -110,19 +93,10 @@ func main() {
 			orderMetrics = appmetrics.NewOrderStatsd(statsdClient)
 		}
 	}
+	_ = orderMetrics
 
-	// Repositories
-	orderRepository := repository.NewOrderRepository(dbase)
-
-	// Services
-	orderService := services.NewOrderService(orderRepository)
-	emailService := email.NewSendtrap(cfg.MailTrap.ApiKey, cfg.MailTrap.ApiUrl)
-
-	// UseCases
-	createOrderUseCase := orderUsecase.NewOrderUseCase(orderService, productService, maintenanceService, customerService, userService, employeeService, emailService, orderRepository, orderProductRepository, orderMaintenanceRepository, apiUrl, orderMetrics)
-
-	// Handlers
-	orderHandler := handlers.NewOrderHandler(orderService, createOrderUseCase)
+	// TODO(fase-4): wire use case implementations once ports and use cases are done.
+	orderHandler := handlers.NewOrderHandler(nil)
 
 	router := http.NewRouter(*cfg, logger, *orderHandler)
 	sugar.Info("Starting HTTP server on port %s", cfg.Http.Port)

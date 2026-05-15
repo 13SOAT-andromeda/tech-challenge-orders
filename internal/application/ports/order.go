@@ -3,54 +3,31 @@ package ports
 import (
 	"context"
 
-	"github.com/13SOAT-andromeda/tech-challenge-orders/internal/adapter/database/model/order"
 	"github.com/13SOAT-andromeda/tech-challenge-orders/internal/domain"
 )
-
-type OrderSearch struct {
-	Status   string
-	Enabled  bool
-	OrderBy  string
-	SortDesc bool
-}
 
 type CreateOrderInput struct {
 	VehicleKilometers int
 	Note              *string
-	DiagnosticNote    *string
-	CustomerVehicleID uint
-	CompanyID         uint
+	CustomerVehicleID string
+	CompanyID         string
 }
 
 type CreateCompleteOrderAnalysisInput struct {
 	DiagnosticNote *string
 	Products       []domain.StockItem
-	Maintenances   []uint
+	Maintenances   []string
 }
 
-type OrderRepository interface {
-	Repository[order.Model]
-	Search(ctx context.Context, params OrderSearch) ([]order.Model, error)
-	FindOrderByID(ctx context.Context, id uint) (*order.Model, error)
-}
-
-type OrderService interface {
-	Create(ctx context.Context, u domain.Order) (*domain.Order, error)
-	GetAll(ctx context.Context, params map[string]interface{}) (*[]domain.Order, error)
-	GetByID(ctx context.Context, id uint) (*domain.Order, error)
-	Update(ctx context.Context, u domain.Order) error
-	Delete(ctx context.Context, id uint) error
-	GetApprovalTemplate(order domain.Order, customer domain.Customer, apiUrl string) (string, error)
-}
-
+// OrderUseCase is the interface consumed by HTTP handlers.
+// Implementations live in internal/application/usecases/order/.
 type OrderUseCase interface {
-	CreateOrder(ctx context.Context, userID uint, input CreateOrderInput) (*domain.Order, error)
-	RequestApproval(ctx context.Context, id uint) error
-	AssignOrder(ctx context.Context, orderID uint, userID uint) error
-	CompleteOrderAnalysis(ctx context.Context, id uint, userID uint, input CreateCompleteOrderAnalysisInput) error
-	ApproveOrder(ctx context.Context, id uint) error
-	RejectOrder(ctx context.Context, id uint) error
-	ArchiveOrder(ctx context.Context, id uint) error
-	StartWorkOrder(ctx context.Context, id uint) error
-	CompleteWorkOrder(ctx context.Context, id uint) error
+	CreateOrder(ctx context.Context, userID string, input CreateOrderInput) (*domain.Order, error)
+	AssignOrder(ctx context.Context, orderID string, userID string) error
+	CompleteOrderAnalysis(ctx context.Context, id string, userID string, input CreateCompleteOrderAnalysisInput) error
+	RequestApproval(ctx context.Context, id string) error
+	ApproveOrder(ctx context.Context, id string) error
+	RejectOrder(ctx context.Context, id string) error
+	ArchiveOrder(ctx context.Context, id string) error
+	CompleteWorkOrder(ctx context.Context, id string) error
 }

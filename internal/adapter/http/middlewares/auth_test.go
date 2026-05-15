@@ -67,13 +67,19 @@ func TestAuthRequired_Refactor(t *testing.T) {
 			expectedStatus: http.StatusUnauthorized,
 		},
 		{
-			name: "Failure - Non-Numeric X-User-Id",
+			// IDs are now UUID strings — non-numeric values are valid.
+			name: "Success - UUID X-User-Id",
 			headers: map[string]string{
-				"X-User-Id":    "abc",
+				"X-User-Id":    "550e8400-e29b-41d4-a716-446655440000",
 				"X-User-Email": "test@example.com",
 				"X-User-Role":  "admin",
 			},
-			expectedStatus: http.StatusUnauthorized,
+			expectedStatus: http.StatusOK,
+			expectedBody: map[string]interface{}{
+				"id":    "550e8400-e29b-41d4-a716-446655440000",
+				"email": "test@example.com",
+				"role":  "admin",
+			},
 		},
 		{
 			name: "Failure - Missing X-User-Email",
