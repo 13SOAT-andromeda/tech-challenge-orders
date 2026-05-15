@@ -1,0 +1,28 @@
+{
+  "uuid": "stock-mock-001",
+  "lastMigration": 32,
+  "name": "Stock Mock",
+  "endpointPrefix": "",
+  "latency": 0,
+  "port": 8082,
+  "hostname": "",
+  "routes": [
+    {
+      "uuid": "r-stock-check-001",
+      "method": "post",
+      "endpoint": "products/check-batch",
+      "responses": [
+        {
+          "uuid": "resp-stock-check-001",
+          "statusCode": 200,
+          "headers": [{ "key": "Content-Type", "value": "application/json" }],
+          "body": "{\"available\":true,\"items\":[]}"
+        }
+      ]
+    }
+  ],
+  "proxyMode": false,
+  "proxyHost": "",
+  "cors": true,
+  "headers": []
+}

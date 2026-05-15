@@ -1,0 +1,67 @@
+{
+  "uuid": "users-mock-001",
+  "lastMigration": 32,
+  "name": "Users Mock",
+  "endpointPrefix": "",
+  "latency": 0,
+  "port": 8081,
+  "hostname": "",
+  "routes": [
+    {
+      "uuid": "r-cv-001",
+      "method": "get",
+      "endpoint": "customer-vehicles/:id",
+      "responses": [
+        {
+          "uuid": "resp-cv-001",
+          "statusCode": 200,
+          "headers": [{ "key": "Content-Type", "value": "application/json" }],
+          "body": "{\"id\":\"{{urlParam 'id'}}\",\"customer_id\":\"customer-1\",\"vehicle\":{\"id\":\"vehicle-1\",\"plate\":\"ABC1234\",\"name\":\"Civic\",\"year\":2020,\"brand\":\"Honda\",\"color\":\"Prata\"}}"
+        }
+      ]
+    },
+    {
+      "uuid": "r-customer-001",
+      "method": "get",
+      "endpoint": "customers/:id",
+      "responses": [
+        {
+          "uuid": "resp-customer-001",
+          "statusCode": 200,
+          "headers": [{ "key": "Content-Type", "value": "application/json" }],
+          "body": "{\"id\":\"{{urlParam 'id'}}\",\"name\":\"Cliente Teste\",\"email\":\"cliente@teste.com\"}"
+        }
+      ]
+    },
+    {
+      "uuid": "r-users-001",
+      "method": "get",
+      "endpoint": "users/:id",
+      "responses": [
+        {
+          "uuid": "resp-users-001",
+          "statusCode": 200,
+          "headers": [{ "key": "Content-Type", "value": "application/json" }],
+          "body": "{\"id\":\"{{urlParam 'id'}}\",\"email\":\"mecanico@oficina.com\",\"role\":\"mechanic\"}"
+        }
+      ]
+    },
+    {
+      "uuid": "r-maintenances-001",
+      "method": "get",
+      "endpoint": "maintenances/check-batch",
+      "responses": [
+        {
+          "uuid": "resp-maintenances-001",
+          "statusCode": 200,
+          "headers": [{ "key": "Content-Type", "value": "application/json" }],
+          "body": "[{\"id\":\"maint-1\",\"name\":\"Troca de óleo\",\"price_cents\":8000}]"
+        }
+      ]
+    }
+  ],
+  "proxyMode": false,
+  "proxyHost": "",
+  "cors": true,
+  "headers": []
+}

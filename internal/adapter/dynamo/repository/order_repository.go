@@ -4,7 +4,9 @@ import (
 	"context"
 	"encoding/base64"
 	"encoding/json"
+	"errors"
 	"fmt"
+	"strconv"
 
 	"github.com/13SOAT-andromeda/tech-challenge-orders/internal/adapter/dynamo/model"
 	orderport "github.com/13SOAT-andromeda/tech-challenge-orders/internal/application/ports/order"
@@ -15,6 +17,10 @@ import (
 	"github.com/aws/aws-sdk-go-v2/service/dynamodb"
 	ddbtypes "github.com/aws/aws-sdk-go-v2/service/dynamodb/types"
 )
+
+// ErrConcurrencyConflict is returned when a concurrent write modified the item
+// between our read and the attempted PutItem.
+var ErrConcurrencyConflict = errors.New("optimistic concurrency conflict")
 
 const (
 	gsiStatus          = "GSI1"
@@ -31,8 +37,9 @@ func NewOrderRepository(client *dynamodb.Client, tableName string) *OrderReposit
 	return &OrderRepository{client: client, tableName: tableName}
 }
 
-// Save grava o agregado inteiro. Concorrência otimista fica pendente até o
-// domínio expor `Version` (ver migration.md §4.1).
+// Save persists the full order aggregate.
+// Optimistic concurrency: on first save (Version=0) it requires the PK to be absent;
+// on subsequent saves it requires the stored Version to equal order.Version-1.
 func (r *OrderRepository) Save(ctx context.Context, order *domain.Order) error {
 	item := model.FromDomain(order)
 	av, err := attributevalue.MarshalMap(item)
@@ -40,13 +47,30 @@ func (r *OrderRepository) Save(ctx context.Context, order *domain.Order) error {
 		return fmt.Errorf("marshal order: %w", err)
 	}
 
-	if _, err := r.client.PutItem(ctx, &dynamodb.PutItemInput{
+	_, err = r.client.PutItem(ctx, &dynamodb.PutItemInput{
 		TableName: aws.String(r.tableName),
 		Item:      av,
-	}); err != nil {
+		// Allow creation when PK is new; require the stored Version to be
+		// order.Version-1 for updates (the domain increments Version before Save).
+		ConditionExpression: aws.String(
+			"attribute_not_exists(PK) OR #ver = :v_prev",
+		),
+		ExpressionAttributeNames: map[string]string{
+			"#ver": "Version",
+		},
+		ExpressionAttributeValues: map[string]ddbtypes.AttributeValue{
+			":v_prev": &ddbtypes.AttributeValueMemberN{
+				Value: strconv.Itoa(order.Version - 1),
+			},
+		},
+	})
+	if err != nil {
+		var ccf *ddbtypes.ConditionalCheckFailedException
+		if errors.As(err, &ccf) {
+			return fmt.Errorf("%w: order %s", ErrConcurrencyConflict, order.ID)
+		}
 		return fmt.Errorf("put order: %w", err)
 	}
-
 	return nil
 }
 
@@ -108,7 +132,7 @@ func (r *OrderRepository) queryGSI(ctx context.Context, indexName, pkAttr, pkVal
 		},
 		Limit:             aws.Int32(limit),
 		ExclusiveStartKey: startKey,
-		ScanIndexForward:  aws.Bool(false), // mais recentes primeiro
+		ScanIndexForward:  aws.Bool(false),
 	})
 	if err != nil {
 		return orderport.PageResult{}, fmt.Errorf("query %s: %w", indexName, err)
