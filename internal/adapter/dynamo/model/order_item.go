@@ -21,44 +21,56 @@ type OrderItem struct {
 	GSI2SK string `dynamodbav:"GSI2SK"`
 	Type   string `dynamodbav:"Type"`
 
-	ID                string         `dynamodbav:"ID"`
-	Status            string         `dynamodbav:"Status"`
-	DateIn            time.Time      `dynamodbav:"DateIn"`
-	DateOut           *time.Time     `dynamodbav:"DateOut,omitempty"`
-	DateApproved      *time.Time     `dynamodbav:"DateApproved,omitempty"`
-	DateRejected      *time.Time     `dynamodbav:"DateRejected,omitempty"`
-	LastStatusAt      *time.Time     `dynamodbav:"LastStatusAt,omitempty"`
-	VehicleKilometers int            `dynamodbav:"VehicleKilometers"`
-	Note              *string        `dynamodbav:"Note,omitempty"`
-	DiagnosticNote    *string        `dynamodbav:"DiagnosticNote,omitempty"`
-	Price             *float64       `dynamodbav:"Price,omitempty"`
-	CustomerVehicleID string         `dynamodbav:"CustomerVehicleID"`
-	EmployeeID        string         `dynamodbav:"EmployeeID,omitempty"`
-	CompanyID         string         `dynamodbav:"CompanyID"`
-	Vehicle           *VehicleAV     `dynamodbav:"Vehicle,omitempty"`
-	Items             []OrderItemsAV `dynamodbav:"Items,omitempty"`
+	ID      string `dynamodbav:"ID"`
+	Status  string `dynamodbav:"Status"`
+	Version int    `dynamodbav:"Version"`
+
+	DateIn       time.Time  `dynamodbav:"DateIn"`
+	DateOut      *time.Time `dynamodbav:"DateOut,omitempty"`
+	DateApproved *time.Time `dynamodbav:"DateApproved,omitempty"`
+	DateRejected *time.Time `dynamodbav:"DateRejected,omitempty"`
+	PaymentDate  *time.Time `dynamodbav:"PaymentDate,omitempty"`
+	LastStatusAt *time.Time `dynamodbav:"LastStatusAt,omitempty"`
+	CreatedAt    time.Time  `dynamodbav:"CreatedAt"`
+	UpdatedAt    time.Time  `dynamodbav:"UpdatedAt"`
+
+	VehicleKilometers int     `dynamodbav:"VehicleKilometers"`
+	Note              *string `dynamodbav:"Note,omitempty"`
+	DiagnosticNote    *string `dynamodbav:"DiagnosticNote,omitempty"`
+	PriceCents        *int64  `dynamodbav:"PriceCents,omitempty"`
+
+	CustomerVehicleID string `dynamodbav:"CustomerVehicleID"`
+	EmployeeID        string `dynamodbav:"EmployeeID,omitempty"`
+	CompanyID         string `dynamodbav:"CompanyID"`
+
+	Vehicle *VehicleAV       `dynamodbav:"Vehicle,omitempty"`
+	Items   []ItemSnapshotAV `dynamodbav:"Items,omitempty"`
+	History []HistoryEntryAV `dynamodbav:"History,omitempty"`
 }
 
 type VehicleAV struct {
-	ID    uint   `dynamodbav:"ID,omitempty"`
-	Plate string `dynamodbav:"Plate,omitempty"`
+	ID    string `dynamodbav:"ID"`
+	Plate string `dynamodbav:"Plate"`
 	Name  string `dynamodbav:"Name"`
 	Year  int    `dynamodbav:"Year"`
 	Brand string `dynamodbav:"Brand"`
 	Color string `dynamodbav:"Color"`
 }
 
-type ItemAV struct {
-	ID    uint   `dynamodbav:"ID"`
-	Name  string `dynamodbav:"Name"`
-	Price int64  `dynamodbav:"Price"`
-	Type  string `dynamodbav:"Type"`
+type ItemSnapshotAV struct {
+	ID             string `dynamodbav:"ID"`
+	Kind           string `dynamodbav:"Kind"`
+	Name           string `dynamodbav:"Name"`
+	Quantity       uint   `dynamodbav:"Quantity"`
+	UnitPriceCents int64  `dynamodbav:"UnitPriceCents"`
 }
 
-type OrderItemsAV struct {
-	Quantity uint   `dynamodbav:"Quantity"`
-	ItemID   uint   `dynamodbav:"ItemID"`
-	Item     ItemAV `dynamodbav:"Item"`
+type HistoryEntryAV struct {
+	From   string    `dynamodbav:"From"`
+	To     string    `dynamodbav:"To"`
+	At     time.Time `dynamodbav:"At"`
+	Actor  string    `dynamodbav:"Actor"`
+	Reason string    `dynamodbav:"Reason,omitempty"`
 }
 
 func PrimaryKey(orderID string) (pk, sk string) {
@@ -92,21 +104,26 @@ func FromDomain(o *domain.Order) *OrderItem {
 		}
 	}
 
-	var items []OrderItemsAV
-	if o.Items != nil {
-		items = make([]OrderItemsAV, 0, len(*o.Items))
-		for _, oi := range *o.Items {
-			items = append(items, OrderItemsAV{
-				Quantity: oi.Quantity,
-				ItemID:   oi.ItemId,
-				Item: ItemAV{
-					ID:    oi.Item.ID,
-					Name:  oi.Item.Name,
-					Price: oi.Item.Price,
-					Type:  oi.Item.Type,
-				},
-			})
-		}
+	items := make([]ItemSnapshotAV, 0, len(o.Items))
+	for _, it := range o.Items {
+		items = append(items, ItemSnapshotAV{
+			ID:             it.ID,
+			Kind:           string(it.Kind),
+			Name:           it.Name,
+			Quantity:       it.Quantity,
+			UnitPriceCents: it.UnitPriceCents,
+		})
+	}
+
+	history := make([]HistoryEntryAV, 0, len(o.History))
+	for _, h := range o.History {
+		history = append(history, HistoryEntryAV{
+			From:   string(h.From),
+			To:     string(h.To),
+			At:     h.At,
+			Actor:  h.Actor,
+			Reason: h.Reason,
+		})
 	}
 
 	return &OrderItem{
@@ -118,29 +135,38 @@ func FromDomain(o *domain.Order) *OrderItem {
 		GSI2SK: gsi2sk,
 		Type:   TypeOrder,
 
-		ID:                o.ID,
-		Status:            string(o.Status),
-		DateIn:            o.DateIn,
-		DateOut:           o.DateOut,
-		DateApproved:      o.DateApproved,
-		DateRejected:      o.DateRejected,
-		LastStatusAt:      o.LastStatusAt,
+		ID:      o.ID,
+		Status:  string(o.Status),
+		Version: o.Version,
+
+		DateIn:       o.DateIn,
+		DateOut:      o.DateOut,
+		DateApproved: o.DateApproved,
+		DateRejected: o.DateRejected,
+		PaymentDate:  o.PaymentDate,
+		LastStatusAt: o.LastStatusAt,
+		CreatedAt:    o.CreatedAt,
+		UpdatedAt:    o.UpdatedAt,
+
 		VehicleKilometers: o.VehicleKilometers,
 		Note:              o.Note,
 		DiagnosticNote:    o.DiagnosticNote,
-		Price:             o.Price,
+		PriceCents:        o.PriceCents,
+
 		CustomerVehicleID: o.CustomerVehicleID,
 		EmployeeID:        o.EmployeeID,
 		CompanyID:         o.CompanyID,
-		Vehicle:           vehicle,
-		Items:             items,
+
+		Vehicle: vehicle,
+		Items:   items,
+		History: history,
 	}
 }
 
 func (it *OrderItem) ToDomain() *domain.Order {
-	var vehicle *domain.Vehicle
+	var vehicle *domain.VehicleSnapshot
 	if it.Vehicle != nil {
-		vehicle = &domain.Vehicle{
+		vehicle = &domain.VehicleSnapshot{
 			ID:    it.Vehicle.ID,
 			Plate: it.Vehicle.Plate,
 			Name:  it.Vehicle.Name,
@@ -150,40 +176,53 @@ func (it *OrderItem) ToDomain() *domain.Order {
 		}
 	}
 
-	var items *[]domain.OrderItems
-	if it.Items != nil {
-		list := make([]domain.OrderItems, 0, len(it.Items))
-		for _, oi := range it.Items {
-			list = append(list, domain.OrderItems{
-				Quantity: oi.Quantity,
-				ItemId:   oi.ItemID,
-				Item: domain.Item{
-					ID:    oi.Item.ID,
-					Name:  oi.Item.Name,
-					Price: oi.Item.Price,
-					Type:  oi.Item.Type,
-				},
-			})
-		}
-		items = &list
+	items := make([]domain.ItemSnapshot, 0, len(it.Items))
+	for _, av := range it.Items {
+		items = append(items, domain.ItemSnapshot{
+			ID:             av.ID,
+			Kind:           domain.ItemKind(av.Kind),
+			Name:           av.Name,
+			Quantity:       av.Quantity,
+			UnitPriceCents: av.UnitPriceCents,
+		})
+	}
+
+	history := make([]domain.HistoryEntry, 0, len(it.History))
+	for _, av := range it.History {
+		history = append(history, domain.HistoryEntry{
+			From:   domain.Status(av.From),
+			To:     domain.Status(av.To),
+			At:     av.At,
+			Actor:  av.Actor,
+			Reason: av.Reason,
+		})
 	}
 
 	return &domain.Order{
-		ID:                it.ID,
-		Status:            domain.Status(it.Status),
-		DateIn:            it.DateIn,
-		DateOut:           it.DateOut,
-		DateApproved:      it.DateApproved,
-		DateRejected:      it.DateRejected,
-		LastStatusAt:      it.LastStatusAt,
+		ID:      it.ID,
+		Status:  domain.Status(it.Status),
+		Version: it.Version,
+
+		DateIn:       it.DateIn,
+		DateOut:      it.DateOut,
+		DateApproved: it.DateApproved,
+		DateRejected: it.DateRejected,
+		PaymentDate:  it.PaymentDate,
+		LastStatusAt: it.LastStatusAt,
+		CreatedAt:    it.CreatedAt,
+		UpdatedAt:    it.UpdatedAt,
+
 		VehicleKilometers: it.VehicleKilometers,
 		Note:              it.Note,
 		DiagnosticNote:    it.DiagnosticNote,
-		Price:             it.Price,
+		PriceCents:        it.PriceCents,
+
 		CustomerVehicleID: it.CustomerVehicleID,
 		EmployeeID:        it.EmployeeID,
 		CompanyID:         it.CompanyID,
-		Vehicle:           vehicle,
-		Items:             items,
+
+		Vehicle: vehicle,
+		Items:   items,
+		History: history,
 	}
 }
