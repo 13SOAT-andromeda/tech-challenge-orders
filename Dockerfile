@@ -17,10 +17,9 @@ RUN go mod download
 # Copy the rest of the application source code (including cmd/api)
 COPY . .
 
-# Build the application binary. We explicitly target the package containing main.go.
-# CGO_ENABLED=0 ensures the binary is statically compiled for the minimal final image.
-# -ldflags "-s -w" removes debugging information and symbol tables for size optimization.
-RUN CGO_ENABLED=0 go build -ldflags "-s -w" -o /usr/local/bin/main ./cmd/api
+# Build both binaries. CGO_ENABLED=0 produces static binaries for the minimal final image.
+RUN CGO_ENABLED=0 go build -ldflags "-s -w" -o /usr/local/bin/api    ./cmd/api && \
+    CGO_ENABLED=0 go build -ldflags "-s -w" -o /usr/local/bin/worker ./cmd/worker
 
 # ----------------------------------------------------------------------
 # STAGE 2: DEVELOPMENT
@@ -75,17 +74,12 @@ WORKDIR /app
 # Create a non-root user to run the application
 RUN addgroup -S nonroot && adduser -S nonroot -G nonroot && apk add --no-cache ca-certificates curl
 
-# Copy the optimized, statically linked binary from the builder stage
-COPY --from=production_builder /usr/local/bin/main /app/main
+# Copy compiled binaries and static assets from the builder stage
+COPY --from=production_builder /usr/local/bin/api    /app/api
+COPY --from=production_builder /usr/local/bin/worker /app/worker
+COPY --from=production_builder /app/swagger          /app/swagger
 
-COPY --from=production_builder /app/internal/adapter/email/templates \
-     /app/internal/adapter/email/templates
-
-COPY --from=production_builder /app/swagger \
-/app/swagger
-
-# Ensure the binary is executable
-RUN chmod +x /app/main
+RUN chmod +x /app/api /app/worker
 
 # Switch to the non-root user
 USER nonroot
@@ -93,5 +87,5 @@ USER nonroot
 # Expose the application port
 EXPOSE 8080
 
-# Run the application
-CMD ["/app/main"]
+# Default entrypoint is the API server; override with /app/worker for the worker container.
+CMD ["/app/api"]
