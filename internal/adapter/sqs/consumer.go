@@ -10,9 +10,9 @@ import (
 	"go.uber.org/zap"
 )
 
-// Handler is called for each message with the parsed event_id and raw data payload.
+// Handler is called for each message with the parsed event_type, event_id and raw data payload.
 // Return nil to delete the message from the queue; return an error to leave it for retry/DLQ.
-type Handler func(ctx context.Context, eventID string, data json.RawMessage) error
+type Handler func(ctx context.Context, eventType, eventID string, data json.RawMessage) error
 
 // Consumer polls a single SQS queue and dispatches each message to Handler.
 type Consumer struct {
@@ -37,8 +37,10 @@ type snsNotification struct {
 }
 
 type eventEnvelope struct {
-	EventID string          `json:"event_id"`
-	Data    json.RawMessage `json:"data"`
+	EventID   string          `json:"event_id"`
+	EventType string          `json:"event_type"`
+	Data      json.RawMessage `json:"data"`
+	Payload   json.RawMessage `json:"payload"`
 }
 
 // Run polls the queue until ctx is cancelled. It never returns a non-nil error for
@@ -101,5 +103,10 @@ func (c *Consumer) process(ctx context.Context, body string) error {
 		return fmt.Errorf("missing event_id in envelope")
 	}
 
-	return c.handler(ctx, envelope.EventID, envelope.Data)
+	data := envelope.Data
+	if len(data) == 0 {
+		data = envelope.Payload
+	}
+
+	return c.handler(ctx, envelope.EventType, envelope.EventID, data)
 }

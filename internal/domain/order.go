@@ -111,8 +111,8 @@ func (o *Order) CompleteWork(actorID string) error {
 	return o.transition(FINISHED, actorID, "")
 }
 
-func (o *Order) MarkPaymentGenerated() error {
-	return o.transition(AWAITING_PAYMENT, "system", "payment generated")
+func (o *Order) MarkPaymentCheckoutCreated() error {
+	return o.transition(AWAITING_PAYMENT, "system", "payment checkout created")
 }
 
 func (o *Order) MarkPaymentApproved() error {

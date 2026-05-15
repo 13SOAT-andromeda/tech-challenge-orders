@@ -42,9 +42,7 @@ type SQSConfig struct {
 	StockAvailableURL   string
 	StockUnavailableURL string
 	StockUpdatedURL     string
-	PaymentGeneratedURL string
-	PaymentApprovedURL  string
-	PaymentFailedURL    string
+	PaymentEventsURL    string
 }
 
 type HTTPClientsConfig struct {
@@ -111,9 +109,7 @@ func Init() (*Config, error) {
 		StockAvailableURL:   getEnv("SQS_STOCK_AVAILABLE_URL", ""),
 		StockUnavailableURL: getEnv("SQS_STOCK_UNAVAILABLE_URL", ""),
 		StockUpdatedURL:     getEnv("SQS_STOCK_UPDATED_URL", ""),
-		PaymentGeneratedURL: getEnv("SQS_PAYMENT_GENERATED_URL", ""),
-		PaymentApprovedURL:  getEnv("SQS_PAYMENT_APPROVED_URL", ""),
-		PaymentFailedURL:    getEnv("SQS_PAYMENT_FAILED_URL", ""),
+		PaymentEventsURL:    getEnv("SQS_PAYMENT_EVENTS_URL", ""),
 	}
 
 	clients := &HTTPClientsConfig{

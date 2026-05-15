@@ -96,9 +96,7 @@ services:
       SQS_STOCK_AVAILABLE_URL: http://localstack:4566/000000000000/orders-stock-available-queue
       SQS_STOCK_UNAVAILABLE_URL: http://localstack:4566/000000000000/orders-stock-unavailable-queue
       SQS_STOCK_UPDATED_URL: http://localstack:4566/000000000000/orders-stock-updated-queue
-      SQS_PAYMENT_GENERATED_URL: http://localstack:4566/000000000000/orders-payment-generated-queue
-      SQS_PAYMENT_APPROVED_URL: http://localstack:4566/000000000000/orders-payment-approved-queue
-      SQS_PAYMENT_FAILED_URL: http://localstack:4566/000000000000/orders-payment-failed-queue
+      SQS_PAYMENT_EVENTS_URL: http://localstack:4566/000000000000/orders-payment-events-queue
       USERS_BASE_URL: http://users-mock:8081
       STOCK_BASE_URL: http://stock-mock:8082
     restart: on-failure

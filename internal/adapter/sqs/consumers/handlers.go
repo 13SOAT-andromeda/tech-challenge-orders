@@ -9,9 +9,8 @@ import (
 	orderusecase "github.com/13SOAT-andromeda/tech-challenge-orders/internal/application/usecases/order"
 )
 
-// StockAvailable handles stock.available events.
 func StockAvailable(svc *orderusecase.Service) sqsadapter.Handler {
-	return func(ctx context.Context, eventID string, data json.RawMessage) error {
+	return func(ctx context.Context, _, eventID string, data json.RawMessage) error {
 		var payload struct {
 			OrderID string `json:"order_id"`
 		}
@@ -22,9 +21,8 @@ func StockAvailable(svc *orderusecase.Service) sqsadapter.Handler {
 	}
 }
 
-// StockUnavailable handles stock.unavailable events.
 func StockUnavailable(svc *orderusecase.Service) sqsadapter.Handler {
-	return func(ctx context.Context, eventID string, data json.RawMessage) error {
+	return func(ctx context.Context, _, eventID string, data json.RawMessage) error {
 		var payload struct {
 			OrderID string `json:"order_id"`
 		}
@@ -35,9 +33,8 @@ func StockUnavailable(svc *orderusecase.Service) sqsadapter.Handler {
 	}
 }
 
-// StockUpdated handles stock.updated events.
 func StockUpdated(svc *orderusecase.Service) sqsadapter.Handler {
-	return func(ctx context.Context, eventID string, data json.RawMessage) error {
+	return func(ctx context.Context, _, eventID string, data json.RawMessage) error {
 		var payload struct {
 			OrderID string `json:"order_id"`
 		}
@@ -48,42 +45,41 @@ func StockUpdated(svc *orderusecase.Service) sqsadapter.Handler {
 	}
 }
 
-// PaymentGenerated handles payment.generated events.
-func PaymentGenerated(svc *orderusecase.Service) sqsadapter.Handler {
-	return func(ctx context.Context, eventID string, data json.RawMessage) error {
-		var payload struct {
-			OrderID string `json:"order_id"`
-		}
-		if err := json.Unmarshal(data, &payload); err != nil {
-			return fmt.Errorf("payment.generated: %w", err)
-		}
-		return svc.HandlePaymentGenerated(ctx, eventID, payload.OrderID)
-	}
-}
+// PaymentEvents routes payment.checkout_created, payment.approved and payment.failed
+// from the single payments-events SNS topic to the appropriate use case.
+func PaymentEvents(svc *orderusecase.Service) sqsadapter.Handler {
+	return func(ctx context.Context, eventType, eventID string, data json.RawMessage) error {
+		switch eventType {
+		case "payment.checkout_created":
+			var p struct {
+				OrderID string `json:"order_id"`
+			}
+			if err := json.Unmarshal(data, &p); err != nil {
+				return fmt.Errorf("payment.checkout_created: %w", err)
+			}
+			return svc.HandlePaymentCheckoutCreated(ctx, eventID, p.OrderID)
 
-// PaymentApproved handles payment.approved events.
-func PaymentApproved(svc *orderusecase.Service) sqsadapter.Handler {
-	return func(ctx context.Context, eventID string, data json.RawMessage) error {
-		var payload struct {
-			OrderID string `json:"order_id"`
-		}
-		if err := json.Unmarshal(data, &payload); err != nil {
-			return fmt.Errorf("payment.approved: %w", err)
-		}
-		return svc.HandlePaymentApproved(ctx, eventID, payload.OrderID)
-	}
-}
+		case "payment.approved":
+			var p struct {
+				OrderID string `json:"order_id"`
+			}
+			if err := json.Unmarshal(data, &p); err != nil {
+				return fmt.Errorf("payment.approved: %w", err)
+			}
+			return svc.HandlePaymentApproved(ctx, eventID, p.OrderID)
 
-// PaymentFailed handles payment.failed events.
-func PaymentFailed(svc *orderusecase.Service) sqsadapter.Handler {
-	return func(ctx context.Context, eventID string, data json.RawMessage) error {
-		var payload struct {
-			OrderID string `json:"order_id"`
-			Reason  string `json:"reason"`
+		case "payment.failed":
+			var p struct {
+				OrderID string `json:"order_id"`
+				Reason  string `json:"reason"`
+			}
+			if err := json.Unmarshal(data, &p); err != nil {
+				return fmt.Errorf("payment.failed: %w", err)
+			}
+			return svc.HandlePaymentFailed(ctx, eventID, p.OrderID, p.Reason)
+
+		default:
+			return fmt.Errorf("unknown payment event type: %s", eventType)
 		}
-		if err := json.Unmarshal(data, &payload); err != nil {
-			return fmt.Errorf("payment.failed: %w", err)
-		}
-		return svc.HandlePaymentFailed(ctx, eventID, payload.OrderID, payload.Reason)
 	}
 }

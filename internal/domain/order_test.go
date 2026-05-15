@@ -40,7 +40,7 @@ func TestOrder_ValidTransitions(t *testing.T) {
 		{"stock unavailable", domain.AWAITING_STOCK_CONSULT, func(o *domain.Order) error { return o.MarkStockUnavailable() }, domain.AWAITING_STOCK_ORDER},
 		{"stock ready", domain.AWAITING_STOCK_ORDER, func(o *domain.Order) error { return o.MarkStockReady() }, domain.IN_PROGRESS},
 		{"complete work", domain.IN_PROGRESS, func(o *domain.Order) error { return o.CompleteWork("emp-1") }, domain.FINISHED},
-		{"payment generated", domain.FINISHED, func(o *domain.Order) error { return o.MarkPaymentGenerated() }, domain.AWAITING_PAYMENT},
+		{"payment checkout created", domain.FINISHED, func(o *domain.Order) error { return o.MarkPaymentCheckoutCreated() }, domain.AWAITING_PAYMENT},
 		{"payment approved", domain.AWAITING_PAYMENT, func(o *domain.Order) error { return o.MarkPaymentApproved() }, domain.PAYMENT_APPROVED},
 		{"payment failed", domain.AWAITING_PAYMENT, func(o *domain.Order) error { return o.MarkPaymentFailed("cancelled") }, domain.PAYMENT_FAILED},
 		{"archive", domain.PAYMENT_APPROVED, func(o *domain.Order) error { return o.Archive("adm-1") }, domain.DELIVERED},
@@ -77,7 +77,7 @@ func TestOrder_InvalidTransitions(t *testing.T) {
 		{"archive from finished", domain.FINISHED, func(o *domain.Order) error { return o.Archive("u") }},
 		{"archive from delivered", domain.DELIVERED, func(o *domain.Order) error { return o.Archive("u") }},
 		{"stock available from received", domain.RECEIVED, func(o *domain.Order) error { return o.MarkStockAvailable() }},
-		{"payment generated from in_progress", domain.IN_PROGRESS, func(o *domain.Order) error { return o.MarkPaymentGenerated() }},
+		{"payment checkout created from in_progress", domain.IN_PROGRESS, func(o *domain.Order) error { return o.MarkPaymentCheckoutCreated() }},
 	}
 
 	for _, tt := range invalid {

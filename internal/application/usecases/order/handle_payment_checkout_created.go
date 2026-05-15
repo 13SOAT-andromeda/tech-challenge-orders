@@ -5,7 +5,7 @@ import (
 	"fmt"
 )
 
-func (s *Service) HandlePaymentGenerated(ctx context.Context, eventID, orderID string) error {
+func (s *Service) HandlePaymentCheckoutCreated(ctx context.Context, eventID, orderID string) error {
 	ok, err := s.idempotency.MarkProcessed(ctx, eventID)
 	if err != nil {
 		return fmt.Errorf("idempotency check: %w", err)
@@ -18,7 +18,7 @@ func (s *Service) HandlePaymentGenerated(ctx context.Context, eventID, orderID s
 	if err != nil {
 		return err
 	}
-	if err := order.MarkPaymentGenerated(); err != nil {
+	if err := order.MarkPaymentCheckoutCreated(); err != nil {
 		return err
 	}
 	if err := s.repo.Save(ctx, order); err != nil {

@@ -79,9 +79,7 @@ func main() {
 		{"stock-available", cfg.SQS.StockAvailableURL, consumers.StockAvailable(svc)},
 		{"stock-unavailable", cfg.SQS.StockUnavailableURL, consumers.StockUnavailable(svc)},
 		{"stock-updated", cfg.SQS.StockUpdatedURL, consumers.StockUpdated(svc)},
-		{"payment-generated", cfg.SQS.PaymentGeneratedURL, consumers.PaymentGenerated(svc)},
-		{"payment-approved", cfg.SQS.PaymentApprovedURL, consumers.PaymentApproved(svc)},
-		{"payment-failed", cfg.SQS.PaymentFailedURL, consumers.PaymentFailed(svc)},
+		{"payment-events", cfg.SQS.PaymentEventsURL, consumers.PaymentEvents(svc)},
 	}
 
 	g, gctx := errgroup.WithContext(ctx)

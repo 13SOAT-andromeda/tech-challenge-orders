@@ -85,10 +85,12 @@ echo "  payments-events-topic: $PAYMENTS_TOPIC_ARN"
 # Creates queue + DLQ, applies RedrivePolicy, subscribes to SNS with FilterPolicy
 # Usage: create_queue_and_subscribe <queue-name> <topic-arn> <event_type>
 # ---------------------------------------------------------------------------
+# Usage: create_queue_and_subscribe <queue-name> <topic-arn> <filter-policy-json>
+# filter-policy-json example: '{"event_type":["stock.available"]}'
 create_queue_and_subscribe() {
   local name="$1"
   local topic_arn="$2"
-  local event_type="$3"
+  local filter_policy="$3"
 
   # DLQ
   local dlq_url
@@ -114,21 +116,19 @@ create_queue_and_subscribe() {
     --topic-arn "$topic_arn" \
     --protocol sqs \
     --notification-endpoint "$q_arn" \
-    --attributes "FilterPolicy={\"event_type\":[\"$event_type\"]}" \
+    --attributes "FilterPolicy=$filter_policy" \
     > /dev/null
 
-  echo "  ✓ $name  ← $event_type"
+  echo "  ✓ $name"
 }
 
 echo "Creating SQS queues and SNS subscriptions..."
 
 # Orders consumes from stock and payments topics
-create_queue_and_subscribe "orders-stock-available-queue"          "$STOCK_TOPIC_ARN"    "stock.available"
-create_queue_and_subscribe "orders-stock-unavailable-queue"        "$STOCK_TOPIC_ARN"    "stock.unavailable"
-create_queue_and_subscribe "orders-stock-updated-queue"            "$STOCK_TOPIC_ARN"    "stock.updated"
-create_queue_and_subscribe "orders-payment-generated-queue"        "$PAYMENTS_TOPIC_ARN" "payment.generated"
-create_queue_and_subscribe "orders-payment-approved-queue"         "$PAYMENTS_TOPIC_ARN" "payment.approved"
-create_queue_and_subscribe "orders-payment-failed-queue"           "$PAYMENTS_TOPIC_ARN" "payment.failed"
+create_queue_and_subscribe "orders-stock-available-queue"   "$STOCK_TOPIC_ARN"    '{"event_type":["stock.available"]}'
+create_queue_and_subscribe "orders-stock-unavailable-queue" "$STOCK_TOPIC_ARN"    '{"event_type":["stock.unavailable"]}'
+create_queue_and_subscribe "orders-stock-updated-queue"     "$STOCK_TOPIC_ARN"    '{"event_type":["stock.updated"]}'
+create_queue_and_subscribe "orders-payment-events-queue"    "$PAYMENTS_TOPIC_ARN" '{"event_type":["payment.checkout_created","payment.approved","payment.failed"]}'
 
 # Lambda Notification consumes from orders topic (declared here for local testing)
 create_queue_and_subscribe "notification-approval-requested-queue" "$ORDERS_TOPIC_ARN"   "order.approval-requested"
