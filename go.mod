@@ -44,10 +44,13 @@ require (
 
 require (
 	github.com/DataDog/gostackparse v0.7.0 // indirect
+	github.com/aws/aws-sdk-go-v2/service/sns v1.39.17 // indirect
+	github.com/aws/aws-sdk-go-v2/service/sqs v1.42.27 // indirect
 	github.com/google/pprof v0.0.0-20241029153458-d1b30febd7db // indirect
 	github.com/richardartoul/molecule v1.0.1-0.20240531184615-7ca0df43c0b3 // indirect
 	github.com/sony/gobreaker v1.0.0 // indirect
 	github.com/spaolacci/murmur3 v1.1.0 // indirect
+	golang.org/x/sync v0.20.0 // indirect
 )
 
 require (
