@@ -27,6 +27,7 @@ type Order struct {
 	PriceCents        *int64
 
 	CustomerVehicleID string
+	CustomerID        string
 	EmployeeID        string
 	CompanyID         string
 

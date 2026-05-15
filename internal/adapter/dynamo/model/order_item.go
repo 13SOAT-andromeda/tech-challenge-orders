@@ -40,6 +40,7 @@ type OrderItem struct {
 	PriceCents        *int64  `dynamodbav:"PriceCents,omitempty"`
 
 	CustomerVehicleID string `dynamodbav:"CustomerVehicleID"`
+	CustomerID        string `dynamodbav:"CustomerID,omitempty"`
 	EmployeeID        string `dynamodbav:"EmployeeID,omitempty"`
 	CompanyID         string `dynamodbav:"CompanyID"`
 
@@ -154,6 +155,7 @@ func FromDomain(o *domain.Order) *OrderItem {
 		PriceCents:        o.PriceCents,
 
 		CustomerVehicleID: o.CustomerVehicleID,
+		CustomerID:        o.CustomerID,
 		EmployeeID:        o.EmployeeID,
 		CompanyID:         o.CompanyID,
 
@@ -218,6 +220,7 @@ func (it *OrderItem) ToDomain() *domain.Order {
 		PriceCents:        it.PriceCents,
 
 		CustomerVehicleID: it.CustomerVehicleID,
+		CustomerID:        it.CustomerID,
 		EmployeeID:        it.EmployeeID,
 		CompanyID:         it.CompanyID,
 
