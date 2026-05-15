@@ -126,9 +126,6 @@ func (h *OrderHandler) GetByID(ctx *gin.Context) {
 	response.RespondError(ctx, http.StatusNotImplemented, "not implemented yet")
 }
 
-func (h *OrderHandler) Delete(ctx *gin.Context) {
-	response.RespondError(ctx, http.StatusGone, "order deletion is not supported")
-}
 
 func (h *OrderHandler) GetInProgress(ctx *gin.Context) {
 	response.RespondError(ctx, http.StatusNotImplemented, "not implemented yet")
@@ -176,11 +173,6 @@ func (h *OrderHandler) ArchiveOrder(ctx *gin.Context) {
 	}
 
 	response.RespondSuccess(ctx, orderID, "Order archived successfully")
-}
-
-// StartWork is removed — stock decrement is triggered via stock.available event after approve.
-func (h *OrderHandler) StartWork(ctx *gin.Context) {
-	response.RespondError(ctx, http.StatusGone, "start-work is no longer available; stock is managed via events")
 }
 
 func (h *OrderHandler) CompleteWork(ctx *gin.Context) {

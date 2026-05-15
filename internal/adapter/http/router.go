@@ -83,10 +83,8 @@ func NewRouter(
 			orderGroup.POST("/:id/approve", orderHandler.ApproveOrder)
 			orderGroup.POST("/:id/reject", orderHandler.RejectOrder)
 			orderGroup.POST("/:id/request-approval", orderHandler.RequestApproval)
-			orderGroup.POST("/:id/start-work", orderHandler.StartWork)
 			orderGroup.POST("/:id/complete-work", orderHandler.CompleteWork)
 			orderGroup.POST("/:id/archive", orderHandler.ArchiveOrder)
-			orderGroup.DELETE("/:id", orderHandler.Delete)
 		}
 	}
 

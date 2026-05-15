@@ -11,13 +11,20 @@ import (
 	"github.com/DataDog/dd-trace-go/v2/profiler"
 	"go.uber.org/zap"
 
+	awsconfig "github.com/aws/aws-sdk-go-v2/config"
+	awssns "github.com/aws/aws-sdk-go-v2/service/sns"
+
+	"github.com/13SOAT-andromeda/tech-challenge-orders/internal/adapter/clients"
 	"github.com/13SOAT-andromeda/tech-challenge-orders/internal/adapter/config"
 	"github.com/13SOAT-andromeda/tech-challenge-orders/internal/adapter/dynamo"
+	dynamoidem "github.com/13SOAT-andromeda/tech-challenge-orders/internal/adapter/dynamo"
 	dynamorepo "github.com/13SOAT-andromeda/tech-challenge-orders/internal/adapter/dynamo/repository"
 	"github.com/13SOAT-andromeda/tech-challenge-orders/internal/adapter/http"
 	"github.com/13SOAT-andromeda/tech-challenge-orders/internal/adapter/http/handlers"
 	appmetrics "github.com/13SOAT-andromeda/tech-challenge-orders/internal/adapter/metrics"
+	snspub "github.com/13SOAT-andromeda/tech-challenge-orders/internal/adapter/sns"
 	"github.com/13SOAT-andromeda/tech-challenge-orders/internal/application/ports"
+	orderusecase "github.com/13SOAT-andromeda/tech-challenge-orders/internal/application/usecases/order"
 )
 
 func main() {
@@ -65,6 +72,7 @@ func main() {
 
 	ctx := context.Background()
 
+	// DynamoDB
 	dynamoClient, err := dynamo.NewClient(ctx, dynamo.Config{
 		Region:    cfg.DynamoDB.Region,
 		Endpoint:  cfg.DynamoDB.Endpoint,
@@ -74,8 +82,33 @@ func main() {
 		sugar.Fatalf("failed to connect to DynamoDB: %v", err)
 	}
 
-	_ = dynamorepo.NewOrderRepository(dynamoClient, cfg.DynamoDB.TableName)
+	repo := dynamorepo.NewOrderRepository(dynamoClient, cfg.DynamoDB.TableName)
+	idempotency := dynamoidem.NewIdempotencyStore(dynamoClient, cfg.DynamoDB.TableName)
 
+	// AWS config for SNS
+	awsCfg, err := awsconfig.LoadDefaultConfig(ctx, awsconfig.WithRegion(cfg.DynamoDB.Region))
+	if err != nil {
+		sugar.Fatalf("failed to load aws config: %v", err)
+	}
+
+	snsClient := awssns.NewFromConfig(awsCfg, func(o *awssns.Options) {
+		if endpoint := os.Getenv("AWS_ENDPOINT_URL"); endpoint != "" {
+			o.BaseEndpoint = &endpoint
+		}
+	})
+	publisher := snspub.NewPublisher(snsClient)
+
+	// HTTP clients
+	usersClient := clients.NewUsersHTTPClient(cfg.Clients.UsersBaseURL, cfg.Clients.TimeoutMs)
+	stockClient := clients.NewStockHTTPClient(cfg.Clients.StockBaseURL, cfg.Clients.TimeoutMs)
+
+	// Use case service
+	svc := orderusecase.NewService(
+		repo, publisher, usersClient, stockClient, idempotency,
+		cfg.SNS.OrdersTopicARN, cfg.Http.PublicBaseURL,
+	)
+
+	// Metrics
 	var orderMetrics ports.OrderMetrics = appmetrics.NoopOrderMetrics{}
 	if !cfg.DogStatsD.Disabled && cfg.DogStatsD.Addr != "" {
 		statsdClient, errStatsd := statsd.New(cfg.DogStatsD.Addr,
@@ -87,7 +120,7 @@ func main() {
 			}),
 		)
 		if errStatsd != nil {
-			sugar.Warnw("dogstatsd indisponível, métricas de ordem desativadas", "error", errStatsd)
+			sugar.Warnw("dogstatsd unavailable, order metrics disabled", "error", errStatsd)
 		} else {
 			defer statsdClient.Close()
 			orderMetrics = appmetrics.NewOrderStatsd(statsdClient)
@@ -95,11 +128,10 @@ func main() {
 	}
 	_ = orderMetrics
 
-	// TODO(fase-4): wire use case implementations once ports and use cases are done.
-	orderHandler := handlers.NewOrderHandler(nil)
+	orderHandler := handlers.NewOrderHandler(svc)
 
 	router := http.NewRouter(*cfg, logger, *orderHandler)
-	sugar.Info("Starting HTTP server on port %s", cfg.Http.Port)
+	sugar.Infof("Starting HTTP server on port %s", cfg.Http.Port)
 
 	if err = router.Server(":" + cfg.Http.Port); err != nil {
 		sugar.Fatalf("failed to start server: %v", err)
