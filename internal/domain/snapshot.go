@@ -4,7 +4,6 @@ type ItemKind string
 
 const (
 	ItemKindProduct     ItemKind = "product"
-	ItemKindService     ItemKind = "service"
 	ItemKindMaintenance ItemKind = "maintenance"
 )
 
