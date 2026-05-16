@@ -9,39 +9,43 @@ import (
 	orderusecase "github.com/13SOAT-andromeda/tech-challenge-orders/internal/application/usecases/order"
 )
 
-func StockAvailable(svc *orderusecase.Service) sqsadapter.Handler {
-	return func(ctx context.Context, _, eventID string, data json.RawMessage) error {
-		var payload struct {
-			OrderID string `json:"order_id"`
+// stockPayload is the raw JSON published by the catalog API.
+// It has no event envelope, so order_id+type is used as the idempotency key.
+type stockPayload struct {
+	OrderID string `json:"order_id"`
+	Type    string `json:"type"`
+}
+
+// StockReserved handles STOCK_RESERVED events from catalog-stock-reserved-topic.
+func StockReserved(svc *orderusecase.Service) sqsadapter.Handler {
+	return func(ctx context.Context, _, _ string, data json.RawMessage) error {
+		var p stockPayload
+		if err := json.Unmarshal(data, &p); err != nil {
+			return fmt.Errorf("STOCK_RESERVED: %w", err)
 		}
-		if err := json.Unmarshal(data, &payload); err != nil {
-			return fmt.Errorf("stock.available: %w", err)
-		}
-		return svc.HandleStockAvailable(ctx, eventID, payload.OrderID)
+		return svc.HandleStockAvailable(ctx, p.OrderID+"#STOCK_RESERVED", p.OrderID)
 	}
 }
 
-func StockUnavailable(svc *orderusecase.Service) sqsadapter.Handler {
-	return func(ctx context.Context, _, eventID string, data json.RawMessage) error {
-		var payload struct {
-			OrderID string `json:"order_id"`
+// StockInsufficient handles STOCK_INSUFFICIENT events from catalog-stock-insufficient-topic.
+func StockInsufficient(svc *orderusecase.Service) sqsadapter.Handler {
+	return func(ctx context.Context, _, _ string, data json.RawMessage) error {
+		var p stockPayload
+		if err := json.Unmarshal(data, &p); err != nil {
+			return fmt.Errorf("STOCK_INSUFFICIENT: %w", err)
 		}
-		if err := json.Unmarshal(data, &payload); err != nil {
-			return fmt.Errorf("stock.unavailable: %w", err)
-		}
-		return svc.HandleStockUnavailable(ctx, eventID, payload.OrderID)
+		return svc.HandleStockUnavailable(ctx, p.OrderID+"#STOCK_INSUFFICIENT", p.OrderID)
 	}
 }
 
-func StockUpdated(svc *orderusecase.Service) sqsadapter.Handler {
-	return func(ctx context.Context, _, eventID string, data json.RawMessage) error {
-		var payload struct {
-			OrderID string `json:"order_id"`
+// BackorderCreated handles BACKORDER_CREATED events from catalog-backorder-created-topic.
+func BackorderCreated(svc *orderusecase.Service) sqsadapter.Handler {
+	return func(ctx context.Context, _, _ string, data json.RawMessage) error {
+		var p stockPayload
+		if err := json.Unmarshal(data, &p); err != nil {
+			return fmt.Errorf("BACKORDER_CREATED: %w", err)
 		}
-		if err := json.Unmarshal(data, &payload); err != nil {
-			return fmt.Errorf("stock.updated: %w", err)
-		}
-		return svc.HandleStockUpdated(ctx, eventID, payload.OrderID)
+		return svc.HandleStockUpdated(ctx, p.OrderID+"#BACKORDER_CREATED", p.OrderID)
 	}
 }
 

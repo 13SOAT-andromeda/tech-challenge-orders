@@ -99,13 +99,14 @@ func (c *Consumer) process(ctx context.Context, body string) error {
 		return fmt.Errorf("unmarshal event envelope: %w", err)
 	}
 
-	if envelope.EventID == "" {
-		return fmt.Errorf("missing event_id in envelope")
-	}
-
 	data := envelope.Data
 	if len(data) == 0 {
 		data = envelope.Payload
+	}
+	// If neither data nor payload fields exist, the inner message is itself the payload
+	// (e.g. publishers that send raw JSON without an envelope wrapper).
+	if len(data) == 0 {
+		data = json.RawMessage(notification.Message)
 	}
 
 	return c.handler(ctx, envelope.EventType, envelope.EventID, data)

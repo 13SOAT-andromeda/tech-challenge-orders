@@ -76,10 +76,10 @@ func main() {
 	}
 
 	defs := []consumerDef{
-		{"stock-available", cfg.SQS.StockAvailableURL, consumers.StockAvailable(svc)},
-		{"stock-unavailable", cfg.SQS.StockUnavailableURL, consumers.StockUnavailable(svc)},
-		{"stock-updated", cfg.SQS.StockUpdatedURL, consumers.StockUpdated(svc)},
-		{"payment-events", cfg.SQS.PaymentEventsURL, consumers.PaymentEvents(svc)},
+		{"stock-reserved",     cfg.SQS.StockReservedURL,     consumers.StockReserved(svc)},
+		{"stock-insufficient", cfg.SQS.StockInsufficientURL, consumers.StockInsufficient(svc)},
+		{"backorder-created",  cfg.SQS.BackorderCreatedURL,  consumers.BackorderCreated(svc)},
+		{"payment-events",     cfg.SQS.PaymentEventsURL,     consumers.PaymentEvents(svc)},
 	}
 
 	g, gctx := errgroup.WithContext(ctx)

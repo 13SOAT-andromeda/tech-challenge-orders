@@ -39,10 +39,10 @@ type SNSConfig struct {
 }
 
 type SQSConfig struct {
-	StockAvailableURL   string
-	StockUnavailableURL string
-	StockUpdatedURL     string
-	PaymentEventsURL    string
+	StockReservedURL     string
+	StockInsufficientURL string
+	BackorderCreatedURL  string
+	PaymentEventsURL     string
 }
 
 type HTTPClientsConfig struct {
@@ -106,10 +106,10 @@ func Init() (*Config, error) {
 	}
 
 	sqs := &SQSConfig{
-		StockAvailableURL:   getEnv("SQS_STOCK_AVAILABLE_URL", ""),
-		StockUnavailableURL: getEnv("SQS_STOCK_UNAVAILABLE_URL", ""),
-		StockUpdatedURL:     getEnv("SQS_STOCK_UPDATED_URL", ""),
-		PaymentEventsURL:    getEnv("SQS_PAYMENT_EVENTS_URL", ""),
+		StockReservedURL:     getEnv("SQS_STOCK_RESERVED_URL", ""),
+		StockInsufficientURL: getEnv("SQS_STOCK_INSUFFICIENT_URL", ""),
+		BackorderCreatedURL:  getEnv("SQS_BACKORDER_CREATED_URL", ""),
+		PaymentEventsURL:     getEnv("SQS_PAYMENT_EVENTS_URL", ""),
 	}
 
 	clients := &HTTPClientsConfig{
