@@ -9,38 +9,87 @@
   "routes": [
     {
       "uuid": "r-cv-001",
+      "type": "http",
       "method": "get",
       "endpoint": "customers/:id/vehicles",
-      "responseMode": "RULES",
+      "responseMode": null,
       "responses": [
         {
           "uuid": "resp-cv-404",
+          "default": false,
           "statusCode": 404,
-          "headers": [{ "key": "Content-Type", "value": "application/json" }],
+          "headers": [
+            {
+              "key": "Content-Type",
+              "value": "application/json"
+            }
+          ],
           "body": "{\"error\":\"not found\"}",
-          "rules": [{ "target": "params", "modifier": "id", "value": "10", "operator": "equals", "invert": false }],
+          "rules": [
+            {
+              "target": "params",
+              "modifier": "id",
+              "value": "10",
+              "operator": "equals",
+              "invert": false
+            }
+          ],
           "rulesOperator": "OR"
         },
         {
           "uuid": "resp-cv-401",
+          "default": false,
           "statusCode": 401,
-          "headers": [{ "key": "Content-Type", "value": "application/json" }],
+          "headers": [
+            {
+              "key": "Content-Type",
+              "value": "application/json"
+            }
+          ],
           "body": "{\"error\":\"unauthorized\"}",
-          "rules": [{ "target": "params", "modifier": "id", "value": "11", "operator": "equals", "invert": false }],
+          "rules": [
+            {
+              "target": "params",
+              "modifier": "id",
+              "value": "11",
+              "operator": "equals",
+              "invert": false
+            }
+          ],
           "rulesOperator": "OR"
         },
         {
           "uuid": "resp-cv-500",
+          "default": false,
           "statusCode": 500,
-          "headers": [{ "key": "Content-Type", "value": "application/json" }],
+          "headers": [
+            {
+              "key": "Content-Type",
+              "value": "application/json"
+            }
+          ],
           "body": "{\"error\":\"internal server error\"}",
-          "rules": [{ "target": "params", "modifier": "id", "value": "12", "operator": "equals", "invert": false }],
+          "rules": [
+            {
+              "target": "params",
+              "modifier": "id",
+              "value": "12",
+              "operator": "equals",
+              "invert": false
+            }
+          ],
           "rulesOperator": "OR"
         },
         {
           "uuid": "resp-cv-001",
+          "default": true,
           "statusCode": 200,
-          "headers": [{ "key": "Content-Type", "value": "application/json" }],
+          "headers": [
+            {
+              "key": "Content-Type",
+              "value": "application/json"
+            }
+          ],
           "body": "[{\"id\":1,\"customer_id\":1,\"vehicle_id\":1,\"vehicle\":{\"id\":1,\"plate\":\"ABC1234\",\"name\":\"Civic\",\"year\":2020,\"brand\":\"Honda\",\"color\":\"Prata\"},\"customer\":{\"id\":1,\"name\":\"Cliente Teste\",\"email\":\"cliente@teste.com\"}}]",
           "rules": [],
           "rulesOperator": "OR"
@@ -49,38 +98,87 @@
     },
     {
       "uuid": "r-customer-001",
+      "type": "http",
       "method": "get",
       "endpoint": "customers/:id",
-      "responseMode": "RULES",
+      "responseMode": null,
       "responses": [
         {
           "uuid": "resp-customer-404",
+          "default": false,
           "statusCode": 404,
-          "headers": [{ "key": "Content-Type", "value": "application/json" }],
+          "headers": [
+            {
+              "key": "Content-Type",
+              "value": "application/json"
+            }
+          ],
           "body": "{\"error\":\"not found\"}",
-          "rules": [{ "target": "params", "modifier": "id", "value": "10", "operator": "equals", "invert": false }],
+          "rules": [
+            {
+              "target": "params",
+              "modifier": "id",
+              "value": "10",
+              "operator": "equals",
+              "invert": false
+            }
+          ],
           "rulesOperator": "OR"
         },
         {
           "uuid": "resp-customer-401",
+          "default": false,
           "statusCode": 401,
-          "headers": [{ "key": "Content-Type", "value": "application/json" }],
+          "headers": [
+            {
+              "key": "Content-Type",
+              "value": "application/json"
+            }
+          ],
           "body": "{\"error\":\"unauthorized\"}",
-          "rules": [{ "target": "params", "modifier": "id", "value": "11", "operator": "equals", "invert": false }],
+          "rules": [
+            {
+              "target": "params",
+              "modifier": "id",
+              "value": "11",
+              "operator": "equals",
+              "invert": false
+            }
+          ],
           "rulesOperator": "OR"
         },
         {
           "uuid": "resp-customer-500",
+          "default": false,
           "statusCode": 500,
-          "headers": [{ "key": "Content-Type", "value": "application/json" }],
+          "headers": [
+            {
+              "key": "Content-Type",
+              "value": "application/json"
+            }
+          ],
           "body": "{\"error\":\"internal server error\"}",
-          "rules": [{ "target": "params", "modifier": "id", "value": "12", "operator": "equals", "invert": false }],
+          "rules": [
+            {
+              "target": "params",
+              "modifier": "id",
+              "value": "12",
+              "operator": "equals",
+              "invert": false
+            }
+          ],
           "rulesOperator": "OR"
         },
         {
           "uuid": "resp-customer-001",
+          "default": true,
           "statusCode": 200,
-          "headers": [{ "key": "Content-Type", "value": "application/json" }],
+          "headers": [
+            {
+              "key": "Content-Type",
+              "value": "application/json"
+            }
+          ],
           "body": "{\"id\":1,\"name\":\"Cliente Teste\",\"email\":\"cliente@teste.com\"}",
           "rules": [],
           "rulesOperator": "OR"
@@ -89,38 +187,87 @@
     },
     {
       "uuid": "r-users-001",
+      "type": "http",
       "method": "get",
       "endpoint": "users/:id",
-      "responseMode": "RULES",
+      "responseMode": null,
       "responses": [
         {
           "uuid": "resp-users-404",
+          "default": false,
           "statusCode": 404,
-          "headers": [{ "key": "Content-Type", "value": "application/json" }],
+          "headers": [
+            {
+              "key": "Content-Type",
+              "value": "application/json"
+            }
+          ],
           "body": "{\"error\":\"not found\"}",
-          "rules": [{ "target": "params", "modifier": "id", "value": "10", "operator": "equals", "invert": false }],
+          "rules": [
+            {
+              "target": "params",
+              "modifier": "id",
+              "value": "10",
+              "operator": "equals",
+              "invert": false
+            }
+          ],
           "rulesOperator": "OR"
         },
         {
           "uuid": "resp-users-401",
+          "default": false,
           "statusCode": 401,
-          "headers": [{ "key": "Content-Type", "value": "application/json" }],
+          "headers": [
+            {
+              "key": "Content-Type",
+              "value": "application/json"
+            }
+          ],
           "body": "{\"error\":\"unauthorized\"}",
-          "rules": [{ "target": "params", "modifier": "id", "value": "11", "operator": "equals", "invert": false }],
+          "rules": [
+            {
+              "target": "params",
+              "modifier": "id",
+              "value": "11",
+              "operator": "equals",
+              "invert": false
+            }
+          ],
           "rulesOperator": "OR"
         },
         {
           "uuid": "resp-users-500",
+          "default": false,
           "statusCode": 500,
-          "headers": [{ "key": "Content-Type", "value": "application/json" }],
+          "headers": [
+            {
+              "key": "Content-Type",
+              "value": "application/json"
+            }
+          ],
           "body": "{\"error\":\"internal server error\"}",
-          "rules": [{ "target": "params", "modifier": "id", "value": "12", "operator": "equals", "invert": false }],
+          "rules": [
+            {
+              "target": "params",
+              "modifier": "id",
+              "value": "12",
+              "operator": "equals",
+              "invert": false
+            }
+          ],
           "rulesOperator": "OR"
         },
         {
           "uuid": "resp-users-001",
+          "default": true,
           "statusCode": 200,
-          "headers": [{ "key": "Content-Type", "value": "application/json" }],
+          "headers": [
+            {
+              "key": "Content-Type",
+              "value": "application/json"
+            }
+          ],
           "body": "{\"id\":1,\"email\":\"mecanico@oficina.com\",\"role\":\"mechanic\"}",
           "rules": [],
           "rulesOperator": "OR"
@@ -129,51 +276,109 @@
     },
     {
       "uuid": "r-maintenances-001",
+      "type": "http",
       "method": "get",
       "endpoint": "maintenances/check-batch",
       "responses": [
         {
           "uuid": "resp-maintenances-001",
+          "default": true,
           "statusCode": 200,
-          "headers": [{ "key": "Content-Type", "value": "application/json" }],
-          "body": "[{\"id\":1,\"name\":\"Troca de óleo\",\"price_cents\":8000}]"
+          "headers": [
+            {
+              "key": "Content-Type",
+              "value": "application/json"
+            }
+          ],
+          "body": "[{\"id\":1,\"name\":\"Troca de óleo\",\"price_cents\":8000}]",
+          "rules": [],
+          "rulesOperator": "OR"
         }
       ]
     },
     {
       "uuid": "r-employees-001",
+      "type": "http",
       "method": "get",
       "endpoint": "employees/:id",
-      "responseMode": "RULES",
+      "responseMode": null,
       "responses": [
         {
           "uuid": "resp-employees-404",
+          "default": false,
           "statusCode": 404,
-          "headers": [{ "key": "Content-Type", "value": "application/json" }],
+          "headers": [
+            {
+              "key": "Content-Type",
+              "value": "application/json"
+            }
+          ],
           "body": "{\"error\":\"not found\"}",
-          "rules": [{ "target": "params", "modifier": "id", "value": "10", "operator": "equals", "invert": false }],
+          "rules": [
+            {
+              "target": "params",
+              "modifier": "id",
+              "value": "10",
+              "operator": "equals",
+              "invert": false
+            }
+          ],
           "rulesOperator": "OR"
         },
         {
           "uuid": "resp-employees-401",
+          "default": false,
           "statusCode": 401,
-          "headers": [{ "key": "Content-Type", "value": "application/json" }],
+          "headers": [
+            {
+              "key": "Content-Type",
+              "value": "application/json"
+            }
+          ],
           "body": "{\"error\":\"unauthorized\"}",
-          "rules": [{ "target": "params", "modifier": "id", "value": "11", "operator": "equals", "invert": false }],
+          "rules": [
+            {
+              "target": "params",
+              "modifier": "id",
+              "value": "11",
+              "operator": "equals",
+              "invert": false
+            }
+          ],
           "rulesOperator": "OR"
         },
         {
           "uuid": "resp-employees-500",
+          "default": false,
           "statusCode": 500,
-          "headers": [{ "key": "Content-Type", "value": "application/json" }],
+          "headers": [
+            {
+              "key": "Content-Type",
+              "value": "application/json"
+            }
+          ],
           "body": "{\"error\":\"internal server error\"}",
-          "rules": [{ "target": "params", "modifier": "id", "value": "12", "operator": "equals", "invert": false }],
+          "rules": [
+            {
+              "target": "params",
+              "modifier": "id",
+              "value": "12",
+              "operator": "equals",
+              "invert": false
+            }
+          ],
           "rulesOperator": "OR"
         },
         {
           "uuid": "resp-employees-001",
+          "default": true,
           "statusCode": 200,
-          "headers": [{ "key": "Content-Type", "value": "application/json" }],
+          "headers": [
+            {
+              "key": "Content-Type",
+              "value": "application/json"
+            }
+          ],
           "body": "{\"id\":1,\"position\":\"attendant\",\"created_at\":\"2026-03-24T02:29:09.506123Z\",\"updated_at\":\"2026-03-24T02:29:09.506123Z\"}",
           "rules": [],
           "rulesOperator": "OR"
@@ -182,38 +387,87 @@
     },
     {
       "uuid": "r-companies-001",
+      "type": "http",
       "method": "get",
       "endpoint": "companies/:id",
-      "responseMode": "RULES",
+      "responseMode": null,
       "responses": [
         {
           "uuid": "resp-companies-404",
+          "default": false,
           "statusCode": 404,
-          "headers": [{ "key": "Content-Type", "value": "application/json" }],
+          "headers": [
+            {
+              "key": "Content-Type",
+              "value": "application/json"
+            }
+          ],
           "body": "{\"error\":\"not found\"}",
-          "rules": [{ "target": "params", "modifier": "id", "value": "10", "operator": "equals", "invert": false }],
+          "rules": [
+            {
+              "target": "params",
+              "modifier": "id",
+              "value": "10",
+              "operator": "equals",
+              "invert": false
+            }
+          ],
           "rulesOperator": "OR"
         },
         {
           "uuid": "resp-companies-401",
+          "default": false,
           "statusCode": 401,
-          "headers": [{ "key": "Content-Type", "value": "application/json" }],
+          "headers": [
+            {
+              "key": "Content-Type",
+              "value": "application/json"
+            }
+          ],
           "body": "{\"error\":\"unauthorized\"}",
-          "rules": [{ "target": "params", "modifier": "id", "value": "11", "operator": "equals", "invert": false }],
+          "rules": [
+            {
+              "target": "params",
+              "modifier": "id",
+              "value": "11",
+              "operator": "equals",
+              "invert": false
+            }
+          ],
           "rulesOperator": "OR"
         },
         {
           "uuid": "resp-companies-500",
+          "default": false,
           "statusCode": 500,
-          "headers": [{ "key": "Content-Type", "value": "application/json" }],
+          "headers": [
+            {
+              "key": "Content-Type",
+              "value": "application/json"
+            }
+          ],
           "body": "{\"error\":\"internal server error\"}",
-          "rules": [{ "target": "params", "modifier": "id", "value": "12", "operator": "equals", "invert": false }],
+          "rules": [
+            {
+              "target": "params",
+              "modifier": "id",
+              "value": "12",
+              "operator": "equals",
+              "invert": false
+            }
+          ],
           "rulesOperator": "OR"
         },
         {
           "uuid": "resp-companies-001",
+          "default": true,
           "statusCode": 200,
-          "headers": [{ "key": "Content-Type", "value": "application/json" }],
+          "headers": [
+            {
+              "key": "Content-Type",
+              "value": "application/json"
+            }
+          ],
           "body": "{\"id\":1,\"name\":\"Oficina Teste\"}",
           "rules": [],
           "rulesOperator": "OR"
