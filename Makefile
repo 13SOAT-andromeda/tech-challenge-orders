@@ -7,33 +7,12 @@ AWS_ECR_IMAGE=$(AWS_ACCOUNT).dkr.ecr.$(AWS_REGION).amazonaws.com/$(AWS_ECR_REPO)
 
 .PHONY: all up down deploy deploy-local deploy-aws switch-eck-aw build-aws apply-aws build load create-tfstate-bucket apply-terraform
 
-up: cluster deps build load deploy-local
+up: build load deploy-local
 	@echo "Waiting for tech-challenge-api deployment..."
 	@sleep 3
 	@kubectl rollout status deployment/tech-challenge-api --timeout=120s || (echo "Deployment não ficou disponível. Verificando status...";  exit 1)
 	@kubectl wait --for=condition=ready pod -l app=tech-challenge-api --timeout=60s || (echo "Pods não ficaram prontos. Verificando status..."; exit 1)
 	@echo "✅ App is running at http://localhost/"
-
-down:
-	kind delete cluster --name $(CLUSTER_NAME)
-
-cluster:
-	kind create cluster --name $(CLUSTER_NAME) --config k8s/kind-config.yaml
-
-deps:
-	@echo "Installing Metrics Server..."
-	kubectl apply -f https://github.com/kubernetes-sigs/metrics-server/releases/latest/download/components.yaml
-	# Patch Metrics Server to work with Kind (Insecure TLS)
-	kubectl patch -n kube-system deployment metrics-server --type=json \
-	  -p '[{"op":"add","path":"/spec/template/spec/containers/0/args/-","value":"--kubelet-insecure-tls"}]'
-	kubectl wait --namespace kube-system \
-	  --for=condition=ready pod \
-	  --selector=k8s-app=metrics-server \
-	  --timeout=5s || true
-	@echo "Installing Datadog Operator..."
-	helm repo add datadog https://helm.datadoghq.com
-	helm install datadog-operator datadog/datadog-operator
-	@envsubst < k8s/base/secrets.yaml | kubectl apply -f -
 
 build:
 	docker build -t $(IMAGE_NAME) .
