@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"strconv"
 	"time"
 
 	"github.com/13SOAT-andromeda/tech-challenge-orders/internal/domain"
@@ -29,6 +30,48 @@ type eventEnvelope struct {
 	Data         any       `json:"data"`
 }
 
+// paymentsEnvelope matches the contract expected by the payments service.
+type paymentsEnvelope struct {
+	EventType string               `json:"event_type"`
+	Payload   orderFinishedPayload `json:"payload"`
+}
+
+type orderFinishedPayload struct {
+	OrderID       string           `json:"order_id"`
+	CustomerID    string           `json:"customer_id"`
+	CustomerEmail string           `json:"customer_email"`
+	Amount        float64          `json:"amount"`
+	Currency      string           `json:"currency"`
+	Items         []paymentItemDTO `json:"items"`
+}
+
+type paymentItemDTO struct {
+	ID        string  `json:"id"`
+	Title     string  `json:"title"`
+	Quantity  uint    `json:"quantity"`
+	UnitPrice float64 `json:"unit_price"`
+}
+
+func toPaymentsPayload(e domain.OrderFinished) orderFinishedPayload {
+	items := make([]paymentItemDTO, len(e.Items))
+	for i, it := range e.Items {
+		items[i] = paymentItemDTO{
+			ID:        strconv.FormatInt(it.ID, 10),
+			Title:     it.Name,
+			Quantity:  it.Quantity,
+			UnitPrice: float64(it.UnitPriceCents) / 100,
+		}
+	}
+	return orderFinishedPayload{
+		OrderID:       e.OrderID,
+		CustomerID:    strconv.FormatInt(e.CustomerID, 10),
+		CustomerEmail: e.CustomerEmail,
+		Amount:        float64(e.AmountCents) / 100,
+		Currency:      "BRL",
+		Items:         items,
+	}
+}
+
 func eventTypeOf(event any) (string, error) {
 	switch event.(type) {
 	case domain.OrderApprovalRequested:
@@ -42,21 +85,29 @@ func eventTypeOf(event any) (string, error) {
 	}
 }
 
+func marshalEvent(eventType string, event any) ([]byte, error) {
+	if ev, ok := event.(domain.OrderFinished); ok {
+		return json.Marshal(paymentsEnvelope{
+			EventType: eventType,
+			Payload:   toPaymentsPayload(ev),
+		})
+	}
+	return json.Marshal(eventEnvelope{
+		EventID:      uuid.New().String(),
+		EventType:    eventType,
+		EventVersion: "1",
+		OccurredAt:   time.Now().UTC(),
+		Data:         event,
+	})
+}
+
 func (p *Publisher) Publish(ctx context.Context, topicARN string, event any) error {
 	eventType, err := eventTypeOf(event)
 	if err != nil {
 		return err
 	}
 
-	envelope := eventEnvelope{
-		EventID:      uuid.New().String(),
-		EventType:    eventType,
-		EventVersion: "1",
-		OccurredAt:   time.Now().UTC(),
-		Data:         event,
-	}
-
-	body, err := json.Marshal(envelope)
+	body, err := marshalEvent(eventType, event)
 	if err != nil {
 		return fmt.Errorf("marshal event: %w", err)
 	}
