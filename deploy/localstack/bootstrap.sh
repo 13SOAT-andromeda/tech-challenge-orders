@@ -97,11 +97,12 @@ create_queue_and_subscribe() {
     --output text --query 'Attributes.QueueArn')
 
   # Main queue with RedrivePolicy
-  local q_url
-  q_url=$($AWS_LS sqs create-queue \
-    --queue-name "$name" \
-    --attributes "$(printf '{"RedrivePolicy":"{\"deadLetterTargetArn\":\"%s\",\"maxReceiveCount\":\"5\"}"}' "$dlq_arn")" \
-    --output text --query QueueUrl)
+  local q_url q_input
+  q_input=$(cat <<EOF
+{"QueueName":"${name}","Attributes":{"RedrivePolicy":"{\"deadLetterTargetArn\":\"${dlq_arn}\",\"maxReceiveCount\":\"5\"}"}}
+EOF
+)
+  q_url=$($AWS_LS sqs create-queue --cli-input-json "$q_input" --output text --query QueueUrl)
   local q_arn
   q_arn=$($AWS_LS sqs get-queue-attributes \
     --queue-url "$q_url" --attribute-names QueueArn \
@@ -109,7 +110,9 @@ create_queue_and_subscribe() {
 
   local sub_args=(--topic-arn "$topic_arn" --protocol sqs --notification-endpoint "$q_arn")
   if [ -n "$filter_policy" ]; then
-    sub_args+=(--attributes "FilterPolicy=$filter_policy")
+    local escaped
+    escaped=$(echo "$filter_policy" | sed 's/"/\\"/g')
+    sub_args+=(--attributes "{\"FilterPolicy\":\"${escaped}\"}")
   fi
   $AWS_LS sns subscribe "${sub_args[@]}" > /dev/null
 
