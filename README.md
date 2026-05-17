@@ -22,7 +22,7 @@ internal/
     ├── http/        # Gin router, handlers, middlewares
     ├── dynamo/      # DynamoDB single-table repository + idempotency store
     ├── sns/         # SNS event publisher
-    ├── sqs/         # Generic SQS consumer + 6 specific handlers
+    ├── sqs/         # Generic SQS consumer + 4 handler factories
     ├── clients/     # Outbound HTTP to Users and Stock services
     ├── config/      # Env-based config
     └── metrics/     # Datadog DogStatsD (noop fallback)
@@ -52,16 +52,25 @@ Optimistic concurrency via `ConditionExpression: attribute_not_exists(PK) OR Ver
 ### Messaging
 
 Fan-out SNS → SQS. Orders publishes to `orders-events-topic` and consumes from
-queues subscribed to `stock-events-topic` and `payments-events-topic`.
+queues subscribed to Catalog and Payments topics.
 
-| Queue | Event | Effect |
-|---|---|---|
-| orders-stock-available-queue | `stock.available` | → `IN_PROGRESS` |
-| orders-stock-unavailable-queue | `stock.unavailable` | → `AWAITING_STOCK_ORDER` |
-| orders-stock-updated-queue | `stock.updated` | → `IN_PROGRESS` |
-| orders-payment-generated-queue | `payment.generated` | → `AWAITING_PAYMENT` |
-| orders-payment-approved-queue | `payment.approved` | → `PAYMENT_APPROVED` |
-| orders-payment-failed-queue | `payment.failed` | → `PAYMENT_FAILED` |
+**Catalog API** publishes one event type per topic (no filter policy needed):
+
+| Queue | Source topic | Event | Effect |
+|---|---|---|---|
+| orders-stock-reserved-queue | `catalog-stock-reserved-topic` | `STOCK_RESERVED` | → `IN_PROGRESS` |
+| orders-stock-insufficient-queue | `catalog-stock-insufficient-topic` | `STOCK_INSUFFICIENT` | → `AWAITING_STOCK_ORDER` |
+| orders-backorder-created-queue | `catalog-backorder-created-topic` | `BACKORDER_CREATED` | → `IN_PROGRESS` |
+
+**Payments API** publishes all payment events to a single topic, filtered by `event_type` MessageAttribute:
+
+| Queue | Source topic | Events (filtered) | Effect |
+|---|---|---|---|
+| orders-payment-events-queue | `payments-events-topic` | `payment.checkout_created` | → `AWAITING_PAYMENT` |
+| | | `payment.approved` | → `PAYMENT_APPROVED` |
+| | | `payment.failed` | → `PAYMENT_FAILED` |
+
+Catalog events carry raw JSON (`order_id`, `type`, etc.) with no envelope — idempotency key is derived as `order_id#<TYPE>`. Payments events carry a `{event_id, event_type, payload}` envelope.
 
 ### Order state machine
 
@@ -69,11 +78,11 @@ queues subscribed to `stock-events-topic` and `payments-events-topic`.
 RECEIVED → IN_ANALYSIS → ANALYSIS_FINISHED → AWAITING_APPROVAL
 AWAITING_APPROVAL → REJECTED
 AWAITING_APPROVAL → AWAITING_STOCK_CONSULT  (publishes order.approved)
-AWAITING_STOCK_CONSULT → IN_PROGRESS        (consumes stock.available)
-AWAITING_STOCK_CONSULT → AWAITING_STOCK_ORDER (consumes stock.unavailable)
-AWAITING_STOCK_ORDER → IN_PROGRESS          (consumes stock.updated)
+AWAITING_STOCK_CONSULT → IN_PROGRESS        (consumes STOCK_RESERVED from Catalog)
+AWAITING_STOCK_CONSULT → AWAITING_STOCK_ORDER (consumes STOCK_INSUFFICIENT from Catalog)
+AWAITING_STOCK_ORDER → IN_PROGRESS          (consumes BACKORDER_CREATED from Catalog)
 IN_PROGRESS → FINISHED                      (publishes order.finished)
-FINISHED → AWAITING_PAYMENT                 (consumes payment.generated)
+FINISHED → AWAITING_PAYMENT                 (consumes payment.checkout_created from Payments)
 AWAITING_PAYMENT → PAYMENT_APPROVED         (consumes payment.approved)
 AWAITING_PAYMENT → PAYMENT_FAILED           (consumes payment.failed)
 PAYMENT_APPROVED → DELIVERED
@@ -169,7 +178,7 @@ internal/
     dynamo/        DynamoDB client, repository, idempotency store
     http/          Router, handlers, middlewares, response helpers
     sns/           SNS publisher
-    sqs/           Generic consumer + 6 handler factories
+    sqs/           Generic consumer + 4 handler factories
     clients/       UsersHTTPClient, StockHTTPClient (retry + circuit breaker)
     metrics/       Datadog DogStatsD or noop
 deploy/
