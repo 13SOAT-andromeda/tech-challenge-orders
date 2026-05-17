@@ -19,6 +19,7 @@ type PageResult struct {
 type Repository interface {
 	Save(ctx context.Context, order *domain.Order) error
 	FindByID(ctx context.Context, id string) (*domain.Order, error)
+	ListAll(ctx context.Context, page Page) (PageResult, error)
 	ListByStatus(ctx context.Context, status domain.Status, page Page) (PageResult, error)
 	ListByCustomerVehicle(ctx context.Context, customerVehicleID string, page Page) (PageResult, error)
 }

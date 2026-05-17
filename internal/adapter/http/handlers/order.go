@@ -2,10 +2,12 @@ package handlers
 
 import (
 	"net/http"
+	"strconv"
 
 	"github.com/13SOAT-andromeda/tech-challenge-orders/internal/adapter/http/middlewares"
 	"github.com/13SOAT-andromeda/tech-challenge-orders/internal/adapter/http/response"
 	"github.com/13SOAT-andromeda/tech-challenge-orders/internal/application/ports"
+	orderport "github.com/13SOAT-andromeda/tech-challenge-orders/internal/application/ports/order"
 	"github.com/13SOAT-andromeda/tech-challenge-orders/internal/domain"
 	"github.com/gin-gonic/gin"
 )
@@ -117,20 +119,46 @@ func (h *OrderHandler) CompleteAnalysis(ctx *gin.Context) {
 	response.RespondSuccess(ctx, "", "Order analysis completed successfully")
 }
 
-// GetAll, GetByID, Delete and GetInProgress will be re-implemented in Fase 7
-// using DynamoDB repository queries directly from use cases.
-
 func (h *OrderHandler) GetAll(ctx *gin.Context) {
-	response.RespondError(ctx, http.StatusNotImplemented, "not implemented yet")
+	page := parsePage(ctx)
+	result, err := h.usecase.GetAllOrders(ctx.Request.Context(), page)
+	if err != nil {
+		response.RespondError(ctx, http.StatusInternalServerError, err.Error())
+		return
+	}
+	response.RespondSuccess(ctx, result, "")
 }
 
 func (h *OrderHandler) GetByID(ctx *gin.Context) {
-	response.RespondError(ctx, http.StatusNotImplemented, "not implemented yet")
+	orderID := ctx.Param("id")
+	detail, err := h.usecase.GetOrderByID(ctx.Request.Context(), orderID)
+	if err != nil {
+		if err == domain.ErrOrderNotFound {
+			response.RespondError(ctx, http.StatusNotFound, err.Error())
+			return
+		}
+		response.RespondError(ctx, http.StatusInternalServerError, err.Error())
+		return
+	}
+	response.RespondSuccess(ctx, detail, "")
 }
 
-
 func (h *OrderHandler) GetInProgress(ctx *gin.Context) {
-	response.RespondError(ctx, http.StatusNotImplemented, "not implemented yet")
+	page := parsePage(ctx)
+	result, err := h.usecase.GetInProgressOrders(ctx.Request.Context(), page)
+	if err != nil {
+		response.RespondError(ctx, http.StatusInternalServerError, err.Error())
+		return
+	}
+	response.RespondSuccess(ctx, result, "")
+}
+
+func parsePage(ctx *gin.Context) orderport.Page {
+	limit, _ := strconv.Atoi(ctx.DefaultQuery("limit", "50"))
+	return orderport.Page{
+		Limit:  int32(limit),
+		Cursor: ctx.Query("cursor"),
+	}
 }
 
 func (h *OrderHandler) ApproveOrder(ctx *gin.Context) {

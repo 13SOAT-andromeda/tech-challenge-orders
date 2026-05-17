@@ -101,6 +101,47 @@ func (r *OrderRepository) FindByID(ctx context.Context, id string) (*domain.Orde
 	return item.ToDomain(), nil
 }
 
+func (r *OrderRepository) ListAll(ctx context.Context, page orderport.Page) (orderport.PageResult, error) {
+	limit := page.Limit
+	if limit <= 0 {
+		limit = defaultPageSize
+	}
+
+	startKey, err := decodeCursor(page.Cursor)
+	if err != nil {
+		return orderport.PageResult{}, fmt.Errorf("decode cursor: %w", err)
+	}
+
+	out, err := r.client.Scan(ctx, &dynamodb.ScanInput{
+		TableName:         aws.String(r.tableName),
+		Limit:             aws.Int32(limit),
+		ExclusiveStartKey: startKey,
+		FilterExpression:  aws.String("begins_with(PK, :prefix)"),
+		ExpressionAttributeValues: map[string]ddbtypes.AttributeValue{
+			":prefix": &ddbtypes.AttributeValueMemberS{Value: "ORDER#"},
+		},
+	})
+	if err != nil {
+		return orderport.PageResult{}, fmt.Errorf("scan orders: %w", err)
+	}
+
+	orders := make([]domain.Order, 0, len(out.Items))
+	for _, raw := range out.Items {
+		var item model.OrderItem
+		if err := attributevalue.UnmarshalMap(raw, &item); err != nil {
+			return orderport.PageResult{}, fmt.Errorf("unmarshal order: %w", err)
+		}
+		orders = append(orders, *item.ToDomain())
+	}
+
+	next, err := encodeCursor(out.LastEvaluatedKey)
+	if err != nil {
+		return orderport.PageResult{}, fmt.Errorf("encode cursor: %w", err)
+	}
+
+	return orderport.PageResult{Orders: orders, NextCursor: next}, nil
+}
+
 func (r *OrderRepository) ListByStatus(ctx context.Context, status domain.Status, page orderport.Page) (orderport.PageResult, error) {
 	return r.queryGSI(ctx, gsiStatus, "GSI1PK", fmt.Sprintf("STATUS#%s", status), page)
 }

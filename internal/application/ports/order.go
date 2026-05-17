@@ -3,6 +3,7 @@ package ports
 import (
 	"context"
 
+	orderport "github.com/13SOAT-andromeda/tech-challenge-orders/internal/application/ports/order"
 	"github.com/13SOAT-andromeda/tech-challenge-orders/internal/domain"
 )
 
@@ -20,6 +21,13 @@ type CreateCompleteOrderAnalysisInput struct {
 	Maintenances   []int64
 }
 
+type OrderDetail struct {
+	domain.Order
+	Customer *Customer
+	Employee *Employee
+	Company  *Company
+}
+
 // OrderUseCase is the interface consumed by HTTP handlers.
 // Implementations live in internal/application/usecases/order/.
 type OrderUseCase interface {
@@ -31,4 +39,7 @@ type OrderUseCase interface {
 	RejectOrder(ctx context.Context, id string) error
 	ArchiveOrder(ctx context.Context, id string) error
 	CompleteWorkOrder(ctx context.Context, id string) error
+	GetAllOrders(ctx context.Context, page orderport.Page) (orderport.PageResult, error)
+	GetOrderByID(ctx context.Context, id string) (*OrderDetail, error)
+	GetInProgressOrders(ctx context.Context, page orderport.Page) (orderport.PageResult, error)
 }
