@@ -100,7 +100,7 @@ create_queue_and_subscribe() {
   local q_url
   q_url=$($AWS_LS sqs create-queue \
     --queue-name "$name" \
-    --attributes "RedrivePolicy={\"deadLetterTargetArn\":\"$dlq_arn\",\"maxReceiveCount\":\"5\"}" \
+    --attributes "$(printf '{"RedrivePolicy":"{\"deadLetterTargetArn\":\"%s\",\"maxReceiveCount\":\"5\"}"}' "$dlq_arn")" \
     --output text --query QueueUrl)
   local q_arn
   q_arn=$($AWS_LS sqs get-queue-attributes \
