@@ -10,7 +10,7 @@ import (
 	"github.com/google/uuid"
 )
 
-func (s *Service) CreateOrder(ctx context.Context, userID string, input ports.CreateOrderInput) (*domain.Order, error) {
+func (s *Service) CreateOrder(ctx context.Context, userID int64, input ports.CreateOrderInput) (*domain.Order, error) {
 	cv, err := s.users.GetCustomerVehicle(ctx, input.CustomerVehicleID)
 	if err != nil {
 		return nil, fmt.Errorf("get customer vehicle: %w", err)

@@ -10,13 +10,13 @@
     {
       "uuid": "r-cv-001",
       "method": "get",
-      "endpoint": "customer-vehicles/:id",
+      "endpoint": "customers/:id/vehicles",
       "responses": [
         {
           "uuid": "resp-cv-001",
           "statusCode": 200,
           "headers": [{ "key": "Content-Type", "value": "application/json" }],
-          "body": "{\"id\":\"{{urlParam 'id'}}\",\"customer_id\":\"customer-1\",\"vehicle\":{\"id\":\"vehicle-1\",\"plate\":\"ABC1234\",\"name\":\"Civic\",\"year\":2020,\"brand\":\"Honda\",\"color\":\"Prata\"}}"
+          "body": "[{\"id\":1,\"customer_id\":1,\"vehicle_id\":1,\"vehicle\":{\"id\":1,\"plate\":\"ABC1234\",\"name\":\"Civic\",\"year\":2020,\"brand\":\"Honda\",\"color\":\"Prata\"},\"customer\":{\"id\":1,\"name\":\"Cliente Teste\",\"email\":\"cliente@teste.com\"}}]"
         }
       ]
     },
@@ -29,7 +29,7 @@
           "uuid": "resp-customer-001",
           "statusCode": 200,
           "headers": [{ "key": "Content-Type", "value": "application/json" }],
-          "body": "{\"id\":\"{{urlParam 'id'}}\",\"name\":\"Cliente Teste\",\"email\":\"cliente@teste.com\"}"
+          "body": "{\"id\":1,\"name\":\"Cliente Teste\",\"email\":\"cliente@teste.com\"}"
         }
       ]
     },
@@ -42,7 +42,7 @@
           "uuid": "resp-users-001",
           "statusCode": 200,
           "headers": [{ "key": "Content-Type", "value": "application/json" }],
-          "body": "{\"id\":\"{{urlParam 'id'}}\",\"email\":\"mecanico@oficina.com\",\"role\":\"mechanic\"}"
+          "body": "{\"id\":1,\"email\":\"mecanico@oficina.com\",\"role\":\"mechanic\"}"
         }
       ]
     },
@@ -55,7 +55,7 @@
           "uuid": "resp-maintenances-001",
           "statusCode": 200,
           "headers": [{ "key": "Content-Type", "value": "application/json" }],
-          "body": "[{\"id\":\"maint-1\",\"name\":\"Troca de óleo\",\"price_cents\":8000}]"
+          "body": "[{\"id\":1,\"name\":\"Troca de óleo\",\"price_cents\":8000}]"
         }
       ]
     }

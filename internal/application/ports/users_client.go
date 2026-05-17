@@ -7,26 +7,28 @@ import (
 )
 
 type CustomerVehicle struct {
-	ID         string
-	CustomerID string
+	ID         int64
+	CustomerID int64
+	VehicleID  int64
 	Vehicle    domain.VehicleSnapshot
+	Customer   *Customer
 }
 
 type Customer struct {
-	ID    string
+	ID    int64
 	Name  string
 	Email string
 }
 
 type User struct {
-	ID    string
+	ID    int64
 	Email string
 	Role  string
 }
 
 type UsersClient interface {
-	GetCustomerVehicle(ctx context.Context, id string) (*CustomerVehicle, error)
-	GetCustomer(ctx context.Context, id string) (*Customer, error)
-	GetUser(ctx context.Context, id string) (*User, error)
-	GetMaintenancesBatch(ctx context.Context, ids []string) ([]domain.ItemSnapshot, error)
+	GetCustomerVehicle(ctx context.Context, id int64) (*CustomerVehicle, error)
+	GetCustomer(ctx context.Context, id int64) (*Customer, error)
+	GetUser(ctx context.Context, id int64) (*User, error)
+	GetMaintenancesBatch(ctx context.Context, ids []int64) ([]domain.ItemSnapshot, error)
 }

@@ -2,7 +2,9 @@ package middlewares
 
 import (
 	"errors"
+	"fmt"
 	"net/http"
+	"strconv"
 
 	"github.com/gin-gonic/gin"
 )
@@ -80,6 +82,19 @@ func GetUserID(c *gin.Context) string {
 	}
 	idStr, _ := id.(string)
 	return idStr
+}
+
+// GetUserIDInt64 reads and parses the user ID from the Gin context as int64.
+func GetUserIDInt64(c *gin.Context) (int64, error) {
+	idStr := GetUserID(c)
+	if idStr == "" {
+		return 0, errors.New("user ID not found in context")
+	}
+	n, err := strconv.ParseInt(idStr, 10, 64)
+	if err != nil {
+		return 0, fmt.Errorf("invalid user ID %q: %w", idStr, err)
+	}
+	return n, nil
 }
 
 // GetUserEmail reads the user email from the Gin context.

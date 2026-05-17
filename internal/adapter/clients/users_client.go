@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
+	"strconv"
 	"strings"
 	"time"
 
@@ -27,13 +28,15 @@ func NewUsersHTTPClient(baseURL string, timeoutMs int) *UsersHTTPClient {
 // API response types (unexported)
 
 type customerVehicleResp struct {
-	ID         string      `json:"id"`
-	CustomerID string      `json:"customer_id"`
-	Vehicle    vehicleResp `json:"vehicle"`
+	ID         int64        `json:"id"`
+	CustomerID int64        `json:"customer_id"`
+	VehicleID  int64        `json:"vehicle_id"`
+	Vehicle    vehicleResp  `json:"vehicle,omitempty"`
+	Customer   customerResp `json:"customer,omitempty"`
 }
 
 type vehicleResp struct {
-	ID    string `json:"id"`
+	ID    int64  `json:"id"`
 	Plate string `json:"plate"`
 	Name  string `json:"name"`
 	Year  int    `json:"year"`
@@ -42,59 +45,66 @@ type vehicleResp struct {
 }
 
 type customerResp struct {
-	ID    string `json:"id"`
+	ID    int64  `json:"id"`
 	Name  string `json:"name"`
 	Email string `json:"email"`
 }
 
 type userResp struct {
-	ID    string `json:"id"`
+	ID    int64  `json:"id"`
 	Email string `json:"email"`
 	Role  string `json:"role"`
 }
 
 type maintenanceResp struct {
-	ID         string `json:"id"`
+	ID         int64  `json:"id"`
 	Name       string `json:"name"`
 	PriceCents int64  `json:"price_cents"`
 }
 
-func (c *UsersHTTPClient) GetCustomerVehicle(ctx context.Context, id string) (*ports.CustomerVehicle, error) {
-	url := c.baseURL + "/customer-vehicles/" + id
+func (c *UsersHTTPClient) GetCustomerVehicle(ctx context.Context, id int64) (*ports.CustomerVehicle, error) {
+	url := c.baseURL + "/customers/" + strconv.FormatInt(id, 10) + "/vehicles"
 	resp, err := c.execute(ctx, func() (*http.Request, error) {
 		return http.NewRequestWithContext(ctx, http.MethodGet, url, nil)
 	})
 	if err != nil {
-		return nil, fmt.Errorf("get customer vehicle %s: %w", id, err)
+		return nil, fmt.Errorf("get customer vehicle %d: %w", id, err)
 	}
 	defer resp.Body.Close()
 
-	var body customerVehicleResp
+	var body []customerVehicleResp
 	if err := json.NewDecoder(resp.Body).Decode(&body); err != nil {
 		return nil, fmt.Errorf("decode customer vehicle: %w", err)
 	}
+	if len(body) == 0 {
+		return nil, fmt.Errorf("customer vehicle %d not found", id)
+	}
 
+	cv := body[0]
+	customer := &ports.Customer{ID: cv.Customer.ID, Name: cv.Customer.Name, Email: cv.Customer.Email}
 	return &ports.CustomerVehicle{
-		ID:         body.ID,
-		CustomerID: body.CustomerID,
+		ID:         cv.ID,
+		CustomerID: cv.CustomerID,
+		VehicleID:  cv.VehicleID,
+		Customer:   customer,
 		Vehicle: domain.VehicleSnapshot{
-			ID:    body.Vehicle.ID,
-			Plate: body.Vehicle.Plate,
-			Name:  body.Vehicle.Name,
-			Year:  body.Vehicle.Year,
-			Brand: body.Vehicle.Brand,
-			Color: body.Vehicle.Color,
+			ID:    cv.Vehicle.ID,
+			Plate: cv.Vehicle.Plate,
+			Name:  cv.Vehicle.Name,
+			Year:  cv.Vehicle.Year,
+			Brand: cv.Vehicle.Brand,
+			Color: cv.Vehicle.Color,
 		},
 	}, nil
 }
 
-func (c *UsersHTTPClient) GetCustomer(ctx context.Context, id string) (*ports.Customer, error) {
-	url := c.baseURL + "/customers/" + id
+func (c *UsersHTTPClient) GetCustomer(ctx context.Context, id int64) (*ports.Customer, error) {
+	url := c.baseURL + "/customers/" + strconv.FormatInt(id, 10)
 	resp, err := c.execute(ctx, func() (*http.Request, error) {
 		return http.NewRequestWithContext(ctx, http.MethodGet, url, nil)
 	})
 	if err != nil {
-		return nil, fmt.Errorf("get customer %s: %w", id, err)
+		return nil, fmt.Errorf("get customer %d: %w", id, err)
 	}
 	defer resp.Body.Close()
 
@@ -106,13 +116,13 @@ func (c *UsersHTTPClient) GetCustomer(ctx context.Context, id string) (*ports.Cu
 	return &ports.Customer{ID: body.ID, Name: body.Name, Email: body.Email}, nil
 }
 
-func (c *UsersHTTPClient) GetUser(ctx context.Context, id string) (*ports.User, error) {
-	url := c.baseURL + "/users/" + id
+func (c *UsersHTTPClient) GetUser(ctx context.Context, id int64) (*ports.User, error) {
+	url := c.baseURL + "/users/" + strconv.FormatInt(id, 10)
 	resp, err := c.execute(ctx, func() (*http.Request, error) {
 		return http.NewRequestWithContext(ctx, http.MethodGet, url, nil)
 	})
 	if err != nil {
-		return nil, fmt.Errorf("get user %s: %w", id, err)
+		return nil, fmt.Errorf("get user %d: %w", id, err)
 	}
 	defer resp.Body.Close()
 
@@ -124,12 +134,16 @@ func (c *UsersHTTPClient) GetUser(ctx context.Context, id string) (*ports.User, 
 	return &ports.User{ID: body.ID, Email: body.Email, Role: body.Role}, nil
 }
 
-func (c *UsersHTTPClient) GetMaintenancesBatch(ctx context.Context, ids []string) ([]domain.ItemSnapshot, error) {
+func (c *UsersHTTPClient) GetMaintenancesBatch(ctx context.Context, ids []int64) ([]domain.ItemSnapshot, error) {
 	if len(ids) == 0 {
 		return nil, nil
 	}
 
-	url := c.baseURL + "/maintenances/check-batch?ids=" + strings.Join(ids, ",")
+	parts := make([]string, 0, len(ids))
+	for _, id := range ids {
+		parts = append(parts, strconv.FormatInt(id, 10))
+	}
+	url := c.baseURL + "/maintenances/check-batch?ids=" + strings.Join(parts, ",")
 	resp, err := c.execute(ctx, func() (*http.Request, error) {
 		return http.NewRequestWithContext(ctx, http.MethodGet, url, nil)
 	})

@@ -3,13 +3,14 @@ package order
 import (
 	"context"
 	"fmt"
+	"strconv"
 	"sync"
 
 	"github.com/13SOAT-andromeda/tech-challenge-orders/internal/application/ports"
 	"github.com/13SOAT-andromeda/tech-challenge-orders/internal/domain"
 )
 
-func (s *Service) CompleteOrderAnalysis(ctx context.Context, id string, userID string, input ports.CreateCompleteOrderAnalysisInput) error {
+func (s *Service) CompleteOrderAnalysis(ctx context.Context, id string, userID int64, input ports.CreateCompleteOrderAnalysisInput) error {
 	order, err := s.repo.FindByID(ctx, id)
 	if err != nil {
 		return err
@@ -43,7 +44,7 @@ func (s *Service) CompleteOrderAnalysis(ctx context.Context, id string, userID s
 
 	items := append(productItems, maintItems...)
 
-	if err := order.CompleteAnalysis(userID, input.DiagnosticNote, items); err != nil {
+	if err := order.CompleteAnalysis(strconv.FormatInt(userID, 10), input.DiagnosticNote, items); err != nil {
 		return err
 	}
 	if err := s.repo.Save(ctx, order); err != nil {

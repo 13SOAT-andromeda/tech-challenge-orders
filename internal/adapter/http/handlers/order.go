@@ -21,19 +21,19 @@ func NewOrderHandler(usecase ports.OrderUseCase) *OrderHandler {
 type CreateOrderRequest struct {
 	VehicleKilometers int     `json:"vehicle_kilometers" binding:"required"`
 	Note              *string `json:"note"`
-	CustomerVehicleID string  `json:"customer_vehicle_id" binding:"required"`
-	CompanyID         string  `json:"company_id" binding:"required"`
+	CustomerVehicleID int64   `json:"customer_vehicle_id" binding:"required"`
+	CompanyID         int64   `json:"company_id" binding:"required"`
 }
 
 type StockItemRequest struct {
-	ID       string `json:"id" binding:"required"`
-	Quantity uint   `json:"quantity" binding:"required"`
+	ID       int64 `json:"id" binding:"required"`
+	Quantity uint  `json:"quantity" binding:"required"`
 }
 
 type CompleteAnalysisRequest struct {
 	DiagnosticNote string             `json:"diagnostic_note"`
 	Products       []StockItemRequest `json:"products" binding:"required"`
-	Maintenances   []string           `json:"maintenances" binding:"required"`
+	Maintenances   []int64            `json:"maintenances" binding:"required"`
 }
 
 func (h *OrderHandler) Create(ctx *gin.Context) {
@@ -43,9 +43,9 @@ func (h *OrderHandler) Create(ctx *gin.Context) {
 		return
 	}
 
-	userID := middlewares.GetUserID(ctx)
-	if userID == "" {
-		response.RespondError(ctx, http.StatusUnauthorized, "User ID not found in context")
+	userID, err := middlewares.GetUserIDInt64(ctx)
+	if err != nil {
+		response.RespondError(ctx, http.StatusUnauthorized, err.Error())
 		return
 	}
 
@@ -67,9 +67,9 @@ func (h *OrderHandler) Create(ctx *gin.Context) {
 
 func (h *OrderHandler) Assign(ctx *gin.Context) {
 	orderID := ctx.Param("id")
-	userID := middlewares.GetUserID(ctx)
-	if userID == "" {
-		response.RespondError(ctx, http.StatusUnauthorized, "User ID not found in context")
+	userID, err := middlewares.GetUserIDInt64(ctx)
+	if err != nil {
+		response.RespondError(ctx, http.StatusUnauthorized, err.Error())
 		return
 	}
 
@@ -84,9 +84,9 @@ func (h *OrderHandler) Assign(ctx *gin.Context) {
 func (h *OrderHandler) CompleteAnalysis(ctx *gin.Context) {
 	orderID := ctx.Param("id")
 
-	userID := middlewares.GetUserID(ctx)
-	if userID == "" {
-		response.RespondError(ctx, http.StatusUnauthorized, "User ID not found in context")
+	userID, err := middlewares.GetUserIDInt64(ctx)
+	if err != nil {
+		response.RespondError(ctx, http.StatusUnauthorized, err.Error())
 		return
 	}
 

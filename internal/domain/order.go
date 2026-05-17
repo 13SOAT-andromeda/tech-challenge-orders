@@ -26,10 +26,10 @@ type Order struct {
 	DiagnosticNote    *string
 	PriceCents        *int64
 
-	CustomerVehicleID string
-	CustomerID        string
-	EmployeeID        string
-	CompanyID         string
+	CustomerVehicleID int64
+	CustomerID        int64
+	EmployeeID        int64
+	CompanyID         int64
 
 	Vehicle *VehicleSnapshot
 	Items   []ItemSnapshot

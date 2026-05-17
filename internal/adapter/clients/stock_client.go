@@ -32,8 +32,8 @@ type checkBatchRequest struct {
 }
 
 type stockItemReq struct {
-	ID  string `json:"id"`
-	Qty uint   `json:"qty"`
+	ID  int64 `json:"id"`
+	Qty uint  `json:"qty"`
 }
 
 type checkBatchResponse struct {
@@ -42,7 +42,7 @@ type checkBatchResponse struct {
 }
 
 type productResp struct {
-	ID             string `json:"id"`
+	ID             int64  `json:"id"`
 	Name           string `json:"name"`
 	Quantity       uint   `json:"quantity"`
 	UnitPriceCents int64  `json:"unit_price_cents"`

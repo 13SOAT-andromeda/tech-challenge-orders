@@ -39,10 +39,10 @@ type OrderItem struct {
 	DiagnosticNote    *string `dynamodbav:"DiagnosticNote,omitempty"`
 	PriceCents        *int64  `dynamodbav:"PriceCents,omitempty"`
 
-	CustomerVehicleID string `dynamodbav:"CustomerVehicleID"`
-	CustomerID        string `dynamodbav:"CustomerID,omitempty"`
-	EmployeeID        string `dynamodbav:"EmployeeID,omitempty"`
-	CompanyID         string `dynamodbav:"CompanyID"`
+	CustomerVehicleID int64 `dynamodbav:"CustomerVehicleID"`
+	CustomerID        int64 `dynamodbav:"CustomerID,omitempty"`
+	EmployeeID        int64 `dynamodbav:"EmployeeID,omitempty"`
+	CompanyID         int64 `dynamodbav:"CompanyID"`
 
 	Vehicle *VehicleAV       `dynamodbav:"Vehicle,omitempty"`
 	Items   []ItemSnapshotAV `dynamodbav:"Items,omitempty"`
@@ -50,7 +50,7 @@ type OrderItem struct {
 }
 
 type VehicleAV struct {
-	ID    string `dynamodbav:"ID"`
+	ID    int64  `dynamodbav:"ID"`
 	Plate string `dynamodbav:"Plate"`
 	Name  string `dynamodbav:"Name"`
 	Year  int    `dynamodbav:"Year"`
@@ -59,7 +59,7 @@ type VehicleAV struct {
 }
 
 type ItemSnapshotAV struct {
-	ID             string `dynamodbav:"ID"`
+	ID             int64  `dynamodbav:"ID"`
 	Kind           string `dynamodbav:"Kind"`
 	Name           string `dynamodbav:"Name"`
 	Quantity       uint   `dynamodbav:"Quantity"`
@@ -83,8 +83,8 @@ func statusGSIKeys(status domain.Status, dateIn time.Time, orderID string) (pk, 
 		fmt.Sprintf("%s#%s", dateIn.UTC().Format(time.RFC3339Nano), orderID)
 }
 
-func customerVehicleGSIKeys(customerVehicleID string, dateIn time.Time, orderID string) (pk, sk string) {
-	return fmt.Sprintf("CUSTOMERVEHICLE#%s", customerVehicleID),
+func customerVehicleGSIKeys(customerVehicleID int64, dateIn time.Time, orderID string) (pk, sk string) {
+	return fmt.Sprintf("CUSTOMERVEHICLE#%d", customerVehicleID),
 		fmt.Sprintf("%s#%s", dateIn.UTC().Format(time.RFC3339Nano), orderID)
 }
 

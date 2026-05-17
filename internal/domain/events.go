@@ -6,7 +6,7 @@ import "time"
 // Consumed by: Lambda Notification (sends approval email with approve/reject links).
 type OrderApprovalRequested struct {
 	OrderID        string
-	CustomerID     string
+	CustomerID     int64
 	CustomerName   string
 	CustomerEmail  string
 	Vehicle        VehicleSnapshot
@@ -30,7 +30,7 @@ type OrderApproved struct {
 // Consumed by: Payments service (generates a payment request).
 type OrderFinished struct {
 	OrderID       string
-	CustomerID    string
+	CustomerID    int64
 	CustomerEmail string
 	AmountCents   int64
 	Items         []ItemSnapshot
