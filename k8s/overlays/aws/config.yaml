@@ -15,7 +15,7 @@ data:
   MAILTRAP_URL: "https://send.api.mailtrap.io/api"
   API_VERSION: "1.0.0"
   DD_ENV: "production"
-  DD_SERVICE: "tech-challenge-api"
+  DD_SERVICE: "tech-challenge-orders-api"
   DD_VERSION: "1.0.0"
   DD_SITE: "us5.datadoghq.com"
 ---

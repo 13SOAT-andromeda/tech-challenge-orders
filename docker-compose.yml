@@ -49,7 +49,7 @@ services:
       PUBLIC_BASE_URL: http://localhost:8080
       DD_AGENT_HOST: datadog-agent
       DD_ENV: ${ENV:-development}
-      DD_SERVICE: ${DD_SERVICE:-tech-challenge-api}
+      DD_SERVICE: ${DD_SERVICE:-tech-challenge-orders-api}
       DD_VERSION: ${API_VERSION:-1.0.0}
     ports:
       - "8080:8080"

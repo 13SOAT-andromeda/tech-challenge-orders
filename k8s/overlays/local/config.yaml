@@ -18,7 +18,7 @@ data:
   STOCK_BASE_URL: "http://COMPOSE_HOST:8082"
   HTTP_CLIENT_TIMEOUT_MS: "2000"
   PUBLIC_BASE_URL: "http://localhost"
-  DD_SERVICE: "tech-challenge-api"
+  DD_SERVICE: "tech-challenge-orders-api"
   DD_SITE: "datadoghq.com"
 
 ---

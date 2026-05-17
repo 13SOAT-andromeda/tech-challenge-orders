@@ -9,7 +9,7 @@ resources:
   - ingress.yaml
 
 images:
-  - name: tech-challenge-api
+  - name: tech-challenge-orders-api
     newName: ECR_IMAGE
 
 secretGenerator:
@@ -27,7 +27,7 @@ configMapGenerator:
 patches:
   - target:
       kind: Deployment
-      name: tech-challenge-api
+      name: tech-challenge-orders-api
     patch: |-
       - op: replace
         path: /spec/template/spec/containers/0/imagePullPolicy
@@ -41,4 +41,4 @@ patches:
                 fieldPath: status.hostIP
 
 generatorOptions:
-   disableNameSuffixHash: true
+  disableNameSuffixHash: true

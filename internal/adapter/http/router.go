@@ -43,7 +43,7 @@ func NewRouter(
 	corsConfig.AllowHeaders = []string{"Origin", "Content-Length", "Content-Type", "Authorization"}
 
 	router := gin.New()
-	router.Use(gintrace.Middleware("tech-challenge-api",
+	router.Use(gintrace.Middleware("tech-challenge-orders-api",
 		gintrace.WithUseGinErrors(),
 		gintrace.WithAnalytics(true),
 		gintrace.WithIgnoreRequest(func(c *gin.Context) bool {

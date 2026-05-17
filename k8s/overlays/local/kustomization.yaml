@@ -11,11 +11,11 @@ resources:
 patches:
   - target:
       kind: Deployment
-      name: tech-challenge-api
+      name: tech-challenge-orders-api
     patch: |-
       - op: replace
         path: /spec/template/spec/containers/0/image
-        value: tech-challenge-api:latest
+        value: tech-challenge-orders-api:latest
       - op: replace
         path: /spec/template/spec/containers/0/imagePullPolicy
         value: Never

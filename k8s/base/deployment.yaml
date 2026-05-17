@@ -1,20 +1,20 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: tech-challenge-api
+  name: tech-challenge-orders-api
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: tech-challenge-api
+      app: tech-challenge-orders-api
   template:
     metadata:
       labels:
-        app: tech-challenge-api
+        app: tech-challenge-orders-api
     spec:
       containers:
         - name: api
-          image: tech-challenge-api:latest
+          image: tech-challenge-orders-api:latest
           imagePullPolicy: IfNotPresent
           ports:
             - containerPort: 8080

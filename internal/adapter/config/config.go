@@ -134,7 +134,7 @@ func Init() (*Config, error) {
 		Clients:  clients,
 		Env:      getEnv("ENV", "development"),
 		Version:  getEnv("API_VERSION", "1.0.0"),
-		Service:  getEnv("DD_SERVICE", "tech-challenge-api"),
+		Service:  getEnv("DD_SERVICE", "tech-challenge-orders-api"),
 		DogStatsD: &DogStatsDConfig{
 			Addr:     dogstatsdAddr,
 			Disabled: dogstatsdDisabled,
