@@ -41,6 +41,7 @@ type UsersClient interface {
 	GetCustomer(ctx context.Context, id int64) (*Customer, error)
 	GetUser(ctx context.Context, id int64) (*User, error)
 	GetEmployee(ctx context.Context, id int64) (*Employee, error)
+	GetEmployeeByUserID(ctx context.Context, userID int64) (*Employee, error)
 	GetCompany(ctx context.Context, id int64) (*Company, error)
 	GetMaintenancesBatch(ctx context.Context, ids []int64) ([]domain.ItemSnapshot, error)
 }

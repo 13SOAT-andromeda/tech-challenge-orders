@@ -7,6 +7,11 @@ import (
 )
 
 func (s *Service) AssignOrder(ctx context.Context, orderID string, userID int64) error {
+	employee, err := s.users.GetEmployeeByUserID(ctx, userID)
+	if err != nil {
+		return fmt.Errorf("get employee by user: %w", err)
+	}
+
 	order, err := s.repo.FindByID(ctx, orderID)
 	if err != nil {
 		return err
@@ -14,7 +19,7 @@ func (s *Service) AssignOrder(ctx context.Context, orderID string, userID int64)
 	if err := order.Assign(strconv.FormatInt(userID, 10)); err != nil {
 		return err
 	}
-	order.EmployeeID = userID
+	order.EmployeeID = employee.ID
 	if err := s.repo.Save(ctx, order); err != nil {
 		return fmt.Errorf("save order: %w", err)
 	}
