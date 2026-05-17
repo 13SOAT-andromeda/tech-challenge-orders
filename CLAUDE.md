@@ -9,8 +9,7 @@ go build ./...            # build all packages
 go test ./...             # run all tests
 go test ./internal/... -run TestFoo  # run a single test
 docker compose up -d      # start local dev (dynamodb-local + localstack + api + worker)
-make up                   # spin up a kind cluster and deploy locally (k8s)
-make down                 # destroy the kind cluster
+make up                   # deploy locally into an existing kind cluster (k8s)
 make build                # docker build
 ```
 
