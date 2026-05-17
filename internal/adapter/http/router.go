@@ -34,7 +34,11 @@ func NewRouter(
 	}
 
 	corsConfig := cors.DefaultConfig()
-	corsConfig.AllowOrigins = config.Http.AllowedOrigins
+	if len(config.Http.AllowedOrigins) == 0 {
+		corsConfig.AllowAllOrigins = true
+	} else {
+		corsConfig.AllowOrigins = config.Http.AllowedOrigins
+	}
 	corsConfig.AllowMethods = []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"}
 	corsConfig.AllowHeaders = []string{"Origin", "Content-Length", "Content-Type", "Authorization"}
 
