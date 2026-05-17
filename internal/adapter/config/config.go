@@ -97,7 +97,7 @@ func Init() (*Config, error) {
 
 	dynamoDB := &DynamoDBConfig{
 		Region:    getEnv("AWS_REGION", "us-east-1"),
-		Endpoint:  getEnv("DYNAMODB_ENDPOINT", ""),
+		Endpoint:  getEnv("AWS_ENDPOINT_URL", ""),
 		TableName: getEnv("DYNAMODB_TABLE", "orders"),
 	}
 

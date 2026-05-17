@@ -1,16 +1,8 @@
 services:
-  dynamodb-local:
-    image: amazon/dynamodb-local:latest
-    command: ["-jar", "DynamoDBLocal.jar", "-sharedDb", "-inMemory"]
-    ports:
-      - "8000:8000"
-    networks:
-      - orders-net
-
   localstack:
     image: localstack/localstack:3
     environment:
-      SERVICES: sns,sqs
+      SERVICES: sns,sqs,dynamodb
       DEBUG: 1
       AWS_DEFAULT_REGION: us-east-1
     ports:
@@ -21,13 +13,11 @@ services:
   bootstrap:
     image: amazon/aws-cli:latest
     depends_on:
-      - dynamodb-local
       - localstack
     environment:
       AWS_ACCESS_KEY_ID: test
       AWS_SECRET_ACCESS_KEY: test
       AWS_DEFAULT_REGION: us-east-1
-      DYNAMODB_ENDPOINT: http://dynamodb-local:8000
       AWS_ENDPOINT_URL: http://localstack:4566
     volumes:
       - ./deploy/localstack:/bootstrap
@@ -47,7 +37,6 @@ services:
       - .env
     environment:
       ENV: ${ENV:-development}
-      DYNAMODB_ENDPOINT: http://dynamodb-local:8000
       AWS_ENDPOINT_URL: http://localstack:4566
       AWS_REGION: us-east-1
       AWS_ACCESS_KEY_ID: test
@@ -86,7 +75,6 @@ services:
       - .env
     environment:
       ENV: ${ENV:-development}
-      DYNAMODB_ENDPOINT: http://dynamodb-local:8000
       AWS_ENDPOINT_URL: http://localstack:4566
       AWS_REGION: us-east-1
       AWS_ACCESS_KEY_ID: test

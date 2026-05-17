@@ -1,25 +1,17 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-DYNAMO_URL="${DYNAMODB_ENDPOINT:-http://dynamodb-local:8000}"
 LS_URL="${AWS_ENDPOINT_URL:-http://localstack:4566}"
 REGION="${AWS_REGION:-us-east-1}"
 TABLE="${DYNAMODB_TABLE:-orders}"
 
-AWS_DYNAMO="aws --endpoint-url=$DYNAMO_URL --region=$REGION"
 AWS_LS="aws --endpoint-url=$LS_URL --region=$REGION"
 
 # ---------------------------------------------------------------------------
 # Wait for services
 # ---------------------------------------------------------------------------
-echo "Waiting for DynamoDB Local..."
-until $AWS_DYNAMO dynamodb list-tables > /dev/null 2>&1; do
-  echo "  DynamoDB not ready, retrying in 2s..."
-  sleep 2
-done
-
-echo "Waiting for LocalStack (SNS/SQS)..."
-until $AWS_LS sns list-topics > /dev/null 2>&1; do
+echo "Waiting for LocalStack (DynamoDB/SNS/SQS)..."
+until $AWS_LS dynamodb list-tables > /dev/null 2>&1; do
   echo "  LocalStack not ready, retrying in 2s..."
   sleep 2
 done
@@ -28,7 +20,7 @@ done
 # DynamoDB table
 # ---------------------------------------------------------------------------
 echo "Creating DynamoDB table '$TABLE'..."
-$AWS_DYNAMO dynamodb create-table \
+$AWS_LS dynamodb create-table \
   --table-name "$TABLE" \
   --attribute-definitions \
     AttributeName=PK,AttributeType=S \
@@ -63,7 +55,7 @@ $AWS_DYNAMO dynamodb create-table \
   2>&1 | grep -v "ResourceInUseException" || true
 
 echo "Enabling TTL on attribute 'ExpiresAt'..."
-$AWS_DYNAMO dynamodb update-time-to-live \
+$AWS_LS dynamodb update-time-to-live \
   --table-name "$TABLE" \
   --time-to-live-specification "Enabled=true,AttributeName=ExpiresAt" \
   > /dev/null 2>&1 || true
