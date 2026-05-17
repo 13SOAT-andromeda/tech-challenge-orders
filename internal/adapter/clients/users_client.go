@@ -56,6 +56,16 @@ type userResp struct {
 	Role  string `json:"role"`
 }
 
+type employeeResp struct {
+	ID       int64  `json:"id"`
+	Position string `json:"position"`
+}
+
+type companyResp struct {
+	ID   int64  `json:"id"`
+	Name string `json:"name"`
+}
+
 type maintenanceResp struct {
 	ID         int64  `json:"id"`
 	Name       string `json:"name"`
@@ -132,6 +142,42 @@ func (c *UsersHTTPClient) GetUser(ctx context.Context, id int64) (*ports.User, e
 	}
 
 	return &ports.User{ID: body.ID, Email: body.Email, Role: body.Role}, nil
+}
+
+func (c *UsersHTTPClient) GetEmployee(ctx context.Context, id int64) (*ports.Employee, error) {
+	url := c.baseURL + "/employees/" + strconv.FormatInt(id, 10)
+	resp, err := c.execute(ctx, func() (*http.Request, error) {
+		return http.NewRequestWithContext(ctx, http.MethodGet, url, nil)
+	})
+	if err != nil {
+		return nil, fmt.Errorf("get employee %d: %w", id, err)
+	}
+	defer resp.Body.Close()
+
+	var body employeeResp
+	if err := json.NewDecoder(resp.Body).Decode(&body); err != nil {
+		return nil, fmt.Errorf("decode employee: %w", err)
+	}
+
+	return &ports.Employee{ID: body.ID, Position: body.Position}, nil
+}
+
+func (c *UsersHTTPClient) GetCompany(ctx context.Context, id int64) (*ports.Company, error) {
+	url := c.baseURL + "/companies/" + strconv.FormatInt(id, 10)
+	resp, err := c.execute(ctx, func() (*http.Request, error) {
+		return http.NewRequestWithContext(ctx, http.MethodGet, url, nil)
+	})
+	if err != nil {
+		return nil, fmt.Errorf("get company %d: %w", id, err)
+	}
+	defer resp.Body.Close()
+
+	var body companyResp
+	if err := json.NewDecoder(resp.Body).Decode(&body); err != nil {
+		return nil, fmt.Errorf("decode company: %w", err)
+	}
+
+	return &ports.Company{ID: body.ID, Name: body.Name}, nil
 }
 
 func (c *UsersHTTPClient) GetMaintenancesBatch(ctx context.Context, ids []int64) ([]domain.ItemSnapshot, error) {

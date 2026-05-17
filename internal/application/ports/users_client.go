@@ -26,9 +26,21 @@ type User struct {
 	Role  string
 }
 
+type Company struct {
+	ID   int64
+	Name string
+}
+
+type Employee struct {
+	ID       int64
+	Position string
+}
+
 type UsersClient interface {
 	GetCustomerVehicle(ctx context.Context, id int64) (*CustomerVehicle, error)
 	GetCustomer(ctx context.Context, id int64) (*Customer, error)
 	GetUser(ctx context.Context, id int64) (*User, error)
+	GetEmployee(ctx context.Context, id int64) (*Employee, error)
+	GetCompany(ctx context.Context, id int64) (*Company, error)
 	GetMaintenancesBatch(ctx context.Context, ids []int64) ([]domain.ItemSnapshot, error)
 }

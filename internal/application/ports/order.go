@@ -10,6 +10,7 @@ type CreateOrderInput struct {
 	VehicleKilometers int
 	Note              *string
 	CustomerVehicleID int64
+	EmployeeID        int64
 	CompanyID         int64
 }
 

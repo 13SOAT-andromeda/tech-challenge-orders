@@ -16,6 +16,14 @@ func (s *Service) CreateOrder(ctx context.Context, userID int64, input ports.Cre
 		return nil, fmt.Errorf("get customer vehicle: %w", err)
 	}
 
+	if _, err := s.users.GetEmployee(ctx, input.EmployeeID); err != nil {
+		return nil, fmt.Errorf("get employee: %w", err)
+	}
+
+	if _, err := s.users.GetCompany(ctx, input.CompanyID); err != nil {
+		return nil, fmt.Errorf("get company: %w", err)
+	}
+
 	now := time.Now()
 	order := &domain.Order{
 		ID:                uuid.New().String(),
@@ -27,6 +35,7 @@ func (s *Service) CreateOrder(ctx context.Context, userID int64, input ports.Cre
 		Note:              input.Note,
 		CustomerVehicleID: input.CustomerVehicleID,
 		CustomerID:        cv.CustomerID,
+		EmployeeID:        input.EmployeeID,
 		CompanyID:         input.CompanyID,
 		Vehicle:           &cv.Vehicle,
 	}

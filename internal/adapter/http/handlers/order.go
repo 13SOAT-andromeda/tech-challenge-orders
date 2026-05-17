@@ -22,6 +22,7 @@ type CreateOrderRequest struct {
 	VehicleKilometers int     `json:"vehicle_kilometers" binding:"required"`
 	Note              *string `json:"note"`
 	CustomerVehicleID int64   `json:"customer_vehicle_id" binding:"required"`
+	EmployeeID        int64   `json:"employee_id" binding:"required"`
 	CompanyID         int64   `json:"company_id" binding:"required"`
 }
 
@@ -53,6 +54,7 @@ func (h *OrderHandler) Create(ctx *gin.Context) {
 		VehicleKilometers: request.VehicleKilometers,
 		Note:              request.Note,
 		CustomerVehicleID: request.CustomerVehicleID,
+		EmployeeID:        request.EmployeeID,
 		CompanyID:         request.CompanyID,
 	}
 
