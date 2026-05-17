@@ -1,17 +1,19 @@
 -include .env
 export
 
-CLUSTER_NAME=tech-challenge-orders-api-local
+CLUSTER_NAME=tech-challenge-local
 IMAGE_NAME=tech-challenge-orders-api:latest
 AWS_ECR_IMAGE=$(AWS_ACCOUNT).dkr.ecr.$(AWS_REGION).amazonaws.com/$(AWS_ECR_REPO)
 
 .PHONY: all up down deploy deploy-local deploy-aws switch-eck-aw build-aws apply-aws build load create-tfstate-bucket apply-terraform
 
 up: build load deploy-local
-	@echo "Waiting for tech-challenge-orders-api deployment..."
+	@echo "Waiting for deployments..."
 	@sleep 3
-	@kubectl rollout status deployment/tech-challenge-orders-api --timeout=120s || (echo "Deployment não ficou disponível. Verificando status...";  exit 1)
-	@kubectl wait --for=condition=ready pod -l app=tech-challenge-orders-api --timeout=60s || (echo "Pods não ficaram prontos. Verificando status..."; exit 1)
+	@kubectl rollout status deployment/tech-challenge-orders-api --timeout=120s || (echo "API não ficou disponível."; exit 1)
+	@kubectl rollout status deployment/tech-challenge-orders-worker --timeout=120s || (echo "Worker não ficou disponível."; exit 1)
+	@kubectl wait --for=condition=ready pod -l app=tech-challenge-orders-api --timeout=60s || (echo "Pods da API não ficaram prontos."; exit 1)
+	@kubectl wait --for=condition=ready pod -l app=tech-challenge-orders-worker --timeout=60s || (echo "Pods do worker não ficaram prontos."; exit 1)
 	@echo "✅ App is running at http://localhost/"
 
 build:
