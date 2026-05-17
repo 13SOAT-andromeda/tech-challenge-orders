@@ -6,7 +6,6 @@ namespace: default
 resources:
   - ../../base
   - config.yaml
-  - postgres.yaml
   - ingress.yaml
 
 patches:

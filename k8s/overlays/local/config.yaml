@@ -3,23 +3,23 @@ kind: ConfigMap
 metadata:
   name: api-config
 data:
-  DB_HOST: "postgres-svc"
-  DB_PORT: "5432"
-  DB_USER: "postgres"
-  DB_NAME: "garagedb"
-  DB_SSLMODE: "disable"
-  DB_TIMEZONE: "UTC"
   ENV: "development"
   HTTP_PORT: "8080"
   HTTP_ALLOWED_ORIGINS: "*"
-  MAILTRAP_URL: "https://send.api.mailtrap.io/api"
-  API_URL: "http://localhost"
-  API_VERSION: "1.0.0"
-  DD_ENV: "development"
-  DD_AGENT_HOST: "datadog-agent"
+  AWS_REGION: "us-east-1"
+  DYNAMODB_TABLE: "orders"
+  AWS_ENDPOINT_URL: "http://COMPOSE_HOST:4566"
+  ORDERS_TOPIC_ARN: "arn:aws:sns:us-east-1:000000000000:orders-events-topic"
+  SQS_STOCK_RESERVED_URL: "http://COMPOSE_HOST:4566/000000000000/orders-stock-reserved-queue"
+  SQS_STOCK_INSUFFICIENT_URL: "http://COMPOSE_HOST:4566/000000000000/orders-stock-insufficient-queue"
+  SQS_BACKORDER_CREATED_URL: "http://COMPOSE_HOST:4566/000000000000/orders-backorder-created-queue"
+  SQS_PAYMENT_EVENTS_URL: "http://COMPOSE_HOST:4566/000000000000/orders-payment-events-queue"
+  USERS_BASE_URL: "http://COMPOSE_HOST:8081"
+  STOCK_BASE_URL: "http://COMPOSE_HOST:8082"
+  HTTP_CLIENT_TIMEOUT_MS: "2000"
+  PUBLIC_BASE_URL: "http://localhost"
   DD_SERVICE: "tech-challenge-api"
-  DD_VERSION: "1.0.0"
-  DD_SITE: "us5.datadoghq.com"
+  DD_SITE: "datadoghq.com"
 
 ---
 apiVersion: v1
@@ -28,7 +28,5 @@ metadata:
   name: api-secrets
 type: Opaque
 stringData:
-  DB_PASSWORD: "postgres"
-  ADMIN_EMAIL: "admin@admin.com"
-  ADMIN_PASSWORD: "Admin123!"
-  MAILTRAP_TOKEN: "6a45f171cfc233e4edc93d8b847cf19f"
+  AWS_ACCESS_KEY_ID: "test"
+  AWS_SECRET_ACCESS_KEY: "test"

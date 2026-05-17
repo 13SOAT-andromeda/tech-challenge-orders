@@ -22,11 +22,11 @@ load:
 
 deploy-local:
 	@echo "Deploying local..."
-	kubectl apply -k k8s/overlays/local
-	@echo "Aguardando a inicialização do postgres..."
-	@sleep 3
-	@kubectl rollout status deployment/postgres --timeout=90s || true
-	@kubectl wait --for=condition=ready pod -l app=postgres --timeout=30s || true
+	@COMPOSE_HOST=$$(ip addr show eth0 | grep 'inet ' | awk '{print $$2}' | cut -d/ -f1) && \
+	echo "Docker host IP: $$COMPOSE_HOST" && \
+	kubectl kustomize k8s/overlays/local | \
+	  sed "s|COMPOSE_HOST|$$COMPOSE_HOST|g" | \
+	  kubectl apply -f -
 
 deploy-aws: apply-terraform switch-eck-aws deps build-aws apply-aws
 
