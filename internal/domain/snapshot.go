@@ -22,6 +22,6 @@ type ItemSnapshot struct {
 	ID             int64    `json:"id"`
 	Kind           ItemKind `json:"kind"`
 	Name           string   `json:"name"`
-	Quantity       uint     `json:"quantity"`
+	Quantity       uint     `json:"qty"`
 	UnitPriceCents int64    `json:"unit_price_cents"`
 }
