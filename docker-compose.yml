@@ -1,7 +1,8 @@
 services:
   localstack:
-    image: localstack/localstack:3
+    image: localstack/localstack
     environment:
+      LOCALSTACK_AUTH_TOKEN: ${LOCALSTACK_AUTH_TOKEN}
       SERVICES: sns,sqs,dynamodb
       DEBUG: 1
       AWS_DEFAULT_REGION: us-east-1
@@ -94,6 +95,8 @@ services:
   users-mock:
     image: mockoon/cli:latest
     command: ["--data", "/data/users.json", "--port", "8081"]
+    ports:
+      - "8081:8081"
     volumes:
       - ./deploy/mocks:/data
     networks:
@@ -102,6 +105,8 @@ services:
   stock-mock:
     image: mockoon/cli:latest
     command: ["--data", "/data/stock.json", "--port", "8082"]
+    ports:
+      - "8082:8082"
     volumes:
       - ./deploy/mocks:/data
     networks:
