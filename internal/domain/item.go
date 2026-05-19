@@ -9,6 +9,6 @@ type Item struct {
 
 // StockItem represents a product quantity used in order analysis and stock operations.
 type StockItem struct {
-	ID       int64 `json:"id"`
-	Quantity uint  `json:"quantity"`
+	ID       string `json:"id"`
+	Quantity uint   `json:"quantity"`
 }

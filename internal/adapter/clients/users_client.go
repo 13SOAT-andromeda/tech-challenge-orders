@@ -224,7 +224,7 @@ func (c *UsersHTTPClient) GetMaintenancesBatch(ctx context.Context, ids []int64)
 	items := make([]domain.ItemSnapshot, 0, len(body))
 	for _, m := range body {
 		items = append(items, domain.ItemSnapshot{
-			ID:             m.ID,
+			ID:             strconv.FormatInt(m.ID, 10),
 			Kind:           domain.ItemKindMaintenance,
 			Name:           m.Name,
 			Quantity:       1,

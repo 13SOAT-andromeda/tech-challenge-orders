@@ -21,9 +21,9 @@ type OrderApprovalRequested struct {
 // OrderApproved is published after Approve.
 // Consumed by: Stock service (reserves/decrements product items).
 type OrderApproved struct {
-	OrderID    string
-	Items      []ItemSnapshot // only Kind == ItemKindProduct entries
-	ApprovedAt time.Time
+	OrderID    string         `json:"order_id"`
+	Items      []ItemSnapshot `json:"items"`
+	ApprovedAt time.Time      `json:"approved_at"`
 }
 
 // OrderFinished is published after CompleteWork.

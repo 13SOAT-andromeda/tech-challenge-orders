@@ -59,7 +59,7 @@ type VehicleAV struct {
 }
 
 type ItemSnapshotAV struct {
-	ID             int64  `dynamodbav:"ID"`
+	ID             string `dynamodbav:"ID"`
 	Kind           string `dynamodbav:"Kind"`
 	Name           string `dynamodbav:"Name"`
 	Quantity       uint   `dynamodbav:"Quantity"`

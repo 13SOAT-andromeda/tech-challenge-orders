@@ -56,7 +56,7 @@ func toPaymentsPayload(e domain.OrderFinished) orderFinishedPayload {
 	items := make([]paymentItemDTO, len(e.Items))
 	for i, it := range e.Items {
 		items[i] = paymentItemDTO{
-			ID:        strconv.FormatInt(it.ID, 10),
+			ID:        it.ID,
 			Title:     it.Name,
 			Quantity:  it.Quantity,
 			UnitPrice: float64(it.UnitPriceCents) / 100,

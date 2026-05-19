@@ -132,8 +132,8 @@ func TestOrder_CompleteAnalysis_CalculatesTotalAndFreezesItems(t *testing.T) {
 	o := newOrder(domain.IN_ANALYSIS)
 	note := "trocar correia"
 	items := []domain.ItemSnapshot{
-		{ID: 1, Kind: domain.ItemKindProduct, Name: "Correia", Quantity: 2, UnitPriceCents: 5000},
-		{ID: 2, Kind: domain.ItemKindMaintenance, Name: "Troca", Quantity: 1, UnitPriceCents: 8000},
+		{ID: "uuid-product-1", Kind: domain.ItemKindProduct, Name: "Correia", Quantity: 2, UnitPriceCents: 5000},
+		{ID: "2", Kind: domain.ItemKindMaintenance, Name: "Troca", Quantity: 1, UnitPriceCents: 8000},
 	}
 
 	err := o.CompleteAnalysis("emp-1", &note, items)

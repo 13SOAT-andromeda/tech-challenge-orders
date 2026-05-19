@@ -29,8 +29,8 @@ type CreateOrderRequest struct {
 }
 
 type StockItemRequest struct {
-	ID       int64 `json:"id" binding:"required"`
-	Quantity uint  `json:"quantity" binding:"required"`
+	ID       string `json:"id" binding:"required"`
+	Quantity uint   `json:"quantity" binding:"required"`
 }
 
 type CompleteAnalysisRequest struct {
