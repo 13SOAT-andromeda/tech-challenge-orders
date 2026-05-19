@@ -9,43 +9,28 @@ import (
 	orderusecase "github.com/13SOAT-andromeda/tech-challenge-orders/internal/application/usecases/order"
 )
 
-// stockPayload is the raw JSON published by the catalog API.
-// It has no event envelope, so order_id+type is used as the idempotency key.
-type stockPayload struct {
+type catalogPayload struct {
 	OrderID string `json:"order_id"`
-	Type    string `json:"type"`
 }
 
-// StockReserved handles STOCK_RESERVED events from catalog-stock-reserved-topic.
-func StockReserved(svc *orderusecase.Service) sqsadapter.Handler {
-	return func(ctx context.Context, _, _ string, data json.RawMessage) error {
-		var p stockPayload
+// CatalogEvents routes STOCK_RESERVED, STOCK_RESERVATION_FAILED and BACKORDER_CREATED
+// events from the single catalog-events SNS topic to the appropriate use case.
+func CatalogEvents(svc *orderusecase.Service) sqsadapter.Handler {
+	return func(ctx context.Context, eventType, _ string, data json.RawMessage) error {
+		var p catalogPayload
 		if err := json.Unmarshal(data, &p); err != nil {
-			return fmt.Errorf("STOCK_RESERVED: %w", err)
+			return fmt.Errorf("%s: %w", eventType, err)
 		}
-		return svc.HandleStockAvailable(ctx, p.OrderID+"#STOCK_RESERVED", p.OrderID)
-	}
-}
-
-// StockInsufficient handles STOCK_INSUFFICIENT events from catalog-stock-insufficient-topic.
-func StockInsufficient(svc *orderusecase.Service) sqsadapter.Handler {
-	return func(ctx context.Context, _, _ string, data json.RawMessage) error {
-		var p stockPayload
-		if err := json.Unmarshal(data, &p); err != nil {
-			return fmt.Errorf("STOCK_INSUFFICIENT: %w", err)
+		switch eventType {
+		case "STOCK_RESERVED":
+			return svc.HandleStockAvailable(ctx, p.OrderID+"#STOCK_RESERVED", p.OrderID)
+		case "STOCK_RESERVATION_FAILED":
+			return svc.HandleStockUnavailable(ctx, p.OrderID+"#STOCK_RESERVATION_FAILED", p.OrderID)
+		case "BACKORDER_CREATED":
+			return svc.HandleStockUpdated(ctx, p.OrderID+"#BACKORDER_CREATED", p.OrderID)
+		default:
+			return fmt.Errorf("unknown catalog event type: %s", eventType)
 		}
-		return svc.HandleStockUnavailable(ctx, p.OrderID+"#STOCK_INSUFFICIENT", p.OrderID)
-	}
-}
-
-// BackorderCreated handles BACKORDER_CREATED events from catalog-backorder-created-topic.
-func BackorderCreated(svc *orderusecase.Service) sqsadapter.Handler {
-	return func(ctx context.Context, _, _ string, data json.RawMessage) error {
-		var p stockPayload
-		if err := json.Unmarshal(data, &p); err != nil {
-			return fmt.Errorf("BACKORDER_CREATED: %w", err)
-		}
-		return svc.HandleStockUpdated(ctx, p.OrderID+"#BACKORDER_CREATED", p.OrderID)
 	}
 }
 

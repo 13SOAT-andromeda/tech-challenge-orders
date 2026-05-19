@@ -31,9 +31,15 @@ func NewConsumer(client *sqs.Client, queueURL string, handler Handler, logger *z
 	}
 }
 
+type sqsMessageAttribute struct {
+	Type  string `json:"Type"`
+	Value string `json:"Value"`
+}
+
 // snsNotification is the outer envelope SNS places around our message when delivering to SQS.
 type snsNotification struct {
-	Message string `json:"Message"`
+	Message           string                         `json:"Message"`
+	MessageAttributes map[string]sqsMessageAttribute `json:"MessageAttributes"`
 }
 
 type eventEnvelope struct {
@@ -109,5 +115,14 @@ func (c *Consumer) process(ctx context.Context, body string) error {
 		data = json.RawMessage(notification.Message)
 	}
 
-	return c.handler(ctx, envelope.EventType, envelope.EventID, data)
+	// Prefer event_type from the inner envelope; fall back to SNS MessageAttributes
+	// for publishers that set it only as a message attribute (e.g. catalog-api).
+	eventType := envelope.EventType
+	if eventType == "" {
+		if attr, ok := notification.MessageAttributes["event_type"]; ok {
+			eventType = attr.Value
+		}
+	}
+
+	return c.handler(ctx, eventType, envelope.EventID, data)
 }

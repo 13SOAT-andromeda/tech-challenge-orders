@@ -65,16 +65,12 @@ $AWS_LS dynamodb update-time-to-live \
 # ---------------------------------------------------------------------------
 echo "Creating SNS topics..."
 ORDERS_TOPIC_ARN=$($AWS_LS sns create-topic --name orders-events-topic --output text --query TopicArn)
-CATALOG_STOCK_RESERVED_ARN=$($AWS_LS sns create-topic --name catalog-stock-reserved-topic --output text --query TopicArn)
-CATALOG_STOCK_INSUFFICIENT_ARN=$($AWS_LS sns create-topic --name catalog-stock-insufficient-topic --output text --query TopicArn)
-CATALOG_BACKORDER_CREATED_ARN=$($AWS_LS sns create-topic --name catalog-backorder-created-topic --output text --query TopicArn)
+CATALOG_EVENTS_ARN=$($AWS_LS sns create-topic --name catalog-events-topic --output text --query TopicArn)
 PAYMENTS_TOPIC_ARN=$($AWS_LS sns create-topic --name payments-events-topic --output text --query TopicArn)
 
-echo "  orders-events-topic:             $ORDERS_TOPIC_ARN"
-echo "  catalog-stock-reserved-topic:    $CATALOG_STOCK_RESERVED_ARN"
-echo "  catalog-stock-insufficient-topic:$CATALOG_STOCK_INSUFFICIENT_ARN"
-echo "  catalog-backorder-created-topic: $CATALOG_BACKORDER_CREATED_ARN"
-echo "  payments-events-topic:           $PAYMENTS_TOPIC_ARN"
+echo "  orders-events-topic:  $ORDERS_TOPIC_ARN"
+echo "  catalog-events-topic: $CATALOG_EVENTS_ARN"
+echo "  payments-events-topic:$PAYMENTS_TOPIC_ARN"
 
 # ---------------------------------------------------------------------------
 # SQS queues helper
@@ -121,10 +117,8 @@ EOF
 
 echo "Creating SQS queues and SNS subscriptions..."
 
-# Orders consumes from catalog topics (one queue per topic — no filter needed)
-create_queue_and_subscribe "orders-stock-reserved-queue"     "$CATALOG_STOCK_RESERVED_ARN"
-create_queue_and_subscribe "orders-stock-insufficient-queue" "$CATALOG_STOCK_INSUFFICIENT_ARN"
-create_queue_and_subscribe "orders-backorder-created-queue"  "$CATALOG_BACKORDER_CREATED_ARN"
+# Orders consumes from the single catalog-events topic (all catalog event types)
+create_queue_and_subscribe "orders-catalog-events-queue" "$CATALOG_EVENTS_ARN"
 
 # Orders consumes from payments topic (filter by event_type MessageAttribute)
 create_queue_and_subscribe "orders-payment-events-queue" "$PAYMENTS_TOPIC_ARN" '{"event_type":["payment.checkout_created","payment.approved","payment.failed"]}'

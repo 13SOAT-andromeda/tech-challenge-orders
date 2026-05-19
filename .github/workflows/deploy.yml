@@ -66,9 +66,7 @@ jobs:
           AWS_REGION=${{ secrets.AWS_REGION }}
           DYNAMODB_TABLE=${{ secrets.DYNAMODB_TABLE }}
           ORDERS_TOPIC_ARN=${{ secrets.ORDERS_TOPIC_ARN }}
-          SQS_STOCK_RESERVED_URL=${{ secrets.SQS_STOCK_RESERVED_URL }}
-          SQS_STOCK_INSUFFICIENT_URL=${{ secrets.SQS_STOCK_INSUFFICIENT_URL }}
-          SQS_BACKORDER_CREATED_URL=${{ secrets.SQS_BACKORDER_CREATED_URL }}
+          SQS_CATALOG_EVENTS_URL=${{ secrets.SQS_CATALOG_EVENTS_URL }}
           SQS_PAYMENT_EVENTS_URL=${{ secrets.SQS_PAYMENT_EVENTS_URL }}
           USERS_BASE_URL=${{ secrets.USERS_BASE_URL }}
           STOCK_BASE_URL=${{ secrets.STOCK_BASE_URL }}
