@@ -1,0 +1,92 @@
+name: Deploy to AWS
+
+on:
+  push:
+    branches: [main]
+    # paths:
+    #   - 'cmd/**'
+    #   - 'internal/**'
+    #   - 'pkg/**'
+    #   - 'k8s/**'
+    #   - 'Dockerfile'
+    #   - '.github/workflows/deploy.yml'
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    env:
+      AWS_REGION: ${{ secrets.AWS_REGION }}
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v3
+
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-session-token: ${{ secrets.AWS_SESSION_TOKEN }}
+          aws-region: ${{ secrets.AWS_REGION }}
+
+      - name: Login to Amazon ECR
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@v2
+
+      - name: Build and Push Docker Image
+        env:
+          ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+          ECR_REPOSITORY: tech-challenge-orders-api-repo
+          IMAGE_TAG: latest
+        run: |
+          docker build --target production -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG .
+          docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
+
+      - name: Update Kubeconfig
+        run: aws eks update-kubeconfig --region ${{ secrets.AWS_REGION }} --name eks-tech-challenge
+
+      - name: Configure Metrics Server
+        run: |
+          kubectl apply -f https://github.com/kubernetes-sigs/metrics-server/releases/latest/download/components.yaml
+
+          kubectl patch -n kube-system deployment metrics-server --type=json \
+            -p '[{"op":"add","path":"/spec/template/spec/containers/0/args/-","value":"--kubelet-insecure-tls"}]'
+
+          kubectl wait --namespace kube-system \
+            --for=condition=ready pod \
+            --selector=k8s-app=metrics-server \
+            --timeout=5s || true
+
+      - name: Generate overlay env files
+        run: |
+          cat > k8s/overlays/aws/.env.secrets << 'EOF'
+          DD_API_KEY=${{ secrets.DD_API_KEY }}
+          EOF
+
+          cat > k8s/overlays/aws/.env.host << EOF
+          AWS_REGION=${{ secrets.AWS_REGION }}
+          DYNAMODB_TABLE=${{ secrets.DYNAMODB_TABLE }}
+          ORDERS_TOPIC_ARN=${{ secrets.ORDERS_TOPIC_ARN }}
+          SQS_STOCK_RESERVED_URL=${{ secrets.SQS_STOCK_RESERVED_URL }}
+          SQS_STOCK_INSUFFICIENT_URL=${{ secrets.SQS_STOCK_INSUFFICIENT_URL }}
+          SQS_BACKORDER_CREATED_URL=${{ secrets.SQS_BACKORDER_CREATED_URL }}
+          SQS_PAYMENT_EVENTS_URL=${{ secrets.SQS_PAYMENT_EVENTS_URL }}
+          USERS_BASE_URL=${{ secrets.USERS_BASE_URL }}
+          STOCK_BASE_URL=${{ secrets.STOCK_BASE_URL }}
+          DD_SERVICE=${{ secrets.DD_SERVICE }}
+          DD_VERSION=${{ secrets.DD_VERSION }}
+          DD_SITE=${{ secrets.DD_SITE }}
+          EOF
+
+      - name: Apply Kustomize
+        env:
+          ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+          ECR_REPOSITORY: tech-challenge-orders
+        run: |
+          kubectl kustomize k8s/overlays/aws | \
+            sed "s|ECR_IMAGE:latest|$ECR_REGISTRY/$ECR_REPOSITORY:latest|g" | \
+            kubectl apply -f -
+
+      - name: Restart deployments
+        run: |
+          kubectl rollout restart deployment tech-challenge-orders-api
+          kubectl rollout restart deployment tech-challenge-orders-worker
