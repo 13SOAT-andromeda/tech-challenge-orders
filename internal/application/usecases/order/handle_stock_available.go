@@ -24,5 +24,7 @@ func (s *Service) HandleStockAvailable(ctx context.Context, eventID, orderID str
 	if err := s.repo.Save(ctx, order); err != nil {
 		return fmt.Errorf("save order: %w", err)
 	}
+	from, to, dur := lastTransitionDuration(order)
+	s.metrics.OrderStatusTransition(ctx, from, to, dur)
 	return nil
 }

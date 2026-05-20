@@ -102,12 +102,6 @@ func main() {
 	usersClient := clients.NewUsersHTTPClient(cfg.Clients.UsersBaseURL, cfg.Clients.TimeoutMs)
 	stockClient := clients.NewStockHTTPClient(cfg.Clients.StockBaseURL, cfg.Clients.TimeoutMs)
 
-	// Use case service
-	svc := orderusecase.NewService(
-		repo, publisher, usersClient, stockClient, idempotency,
-		cfg.SNS.OrdersTopicARN, cfg.Http.PublicBaseURL,
-	)
-
 	// Metrics
 	var orderMetrics ports.OrderMetrics = appmetrics.NoopOrderMetrics{}
 	if !cfg.DogStatsD.Disabled && cfg.DogStatsD.Addr != "" {
@@ -126,7 +120,12 @@ func main() {
 			orderMetrics = appmetrics.NewOrderStatsd(statsdClient)
 		}
 	}
-	_ = orderMetrics
+
+	// Use case service
+	svc := orderusecase.NewService(
+		repo, publisher, usersClient, stockClient, idempotency, orderMetrics,
+		cfg.SNS.OrdersTopicARN, cfg.Http.PublicBaseURL,
+	)
 
 	orderHandler := handlers.NewOrderHandler(svc)
 

@@ -43,5 +43,6 @@ func (s *Service) CreateOrder(ctx context.Context, userID int64, input ports.Cre
 	if err := s.repo.Save(ctx, order); err != nil {
 		return nil, fmt.Errorf("save order: %w", err)
 	}
+	s.metrics.OrderCreated(ctx)
 	return order, nil
 }
