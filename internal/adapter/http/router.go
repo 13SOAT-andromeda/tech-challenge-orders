@@ -47,7 +47,7 @@ func NewRouter(
 		gintrace.WithUseGinErrors(),
 		gintrace.WithAnalytics(true),
 		gintrace.WithIgnoreRequest(func(c *gin.Context) bool {
-			return c.Request.URL.Path == "/api/health"
+			return c.Request.URL.Path == "/v1/health"
 		}),
 		gintrace.WithStatusCheck(func(statusCode int) bool {
 			return statusCode >= 400
@@ -71,7 +71,7 @@ func NewRouter(
 	router.Use(
 		cors.New(corsConfig),
 	)
-	api := router.Group("/api")
+	api := router.Group("/v1")
 	protected := api.Group("/")
 	protected.Use(middlewares.AuthRequired())
 	{
@@ -107,7 +107,7 @@ func NewRouter(
 	api.Static("/swagger", "./swagger")
 
 	// Serve the swagger UI under /api/docs and point it to the static spec at /api/swagger/swagger.yaml
-	api.GET("/docs/*any", swagger.WrapHandler(swaggerFiles.Handler, swagger.URL("/api/swagger/swagger.yaml")))
+	api.GET("/docs/*any", swagger.WrapHandler(swaggerFiles.Handler, swagger.URL("/v1/swagger/swagger.yaml")))
 
 	api.StaticFile("/redoc", "./swagger/redoc.html")
 

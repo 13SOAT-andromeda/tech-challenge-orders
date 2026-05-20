@@ -78,7 +78,7 @@ jobs:
       - name: Apply Kustomize
         env:
           ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
-          ECR_REPOSITORY: tech-challenge-orders
+          ECR_REPOSITORY: tech-challenge-orders-api-repo
         run: |
           kubectl kustomize k8s/overlays/aws | \
             sed "s|ECR_IMAGE:latest|$ECR_REGISTRY/$ECR_REPOSITORY:latest|g" | \
