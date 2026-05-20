@@ -47,7 +47,7 @@ func NewRouter(
 		gintrace.WithUseGinErrors(),
 		gintrace.WithAnalytics(true),
 		gintrace.WithIgnoreRequest(func(c *gin.Context) bool {
-			return c.Request.URL.Path == "/v1/health"
+			return c.Request.URL.Path == "/health"
 		}),
 		gintrace.WithStatusCheck(func(statusCode int) bool {
 			return statusCode >= 400
@@ -99,7 +99,7 @@ func NewRouter(
 		publicOrders.GET("/:id/reject", orderHandler.RejectOrder)
 	}
 
-	api.GET("/health", func(c *gin.Context) {
+	router.GET("/health", func(c *gin.Context) {
 		response.RespondSuccess(c, http.StatusOK, "ok")
 	})
 
