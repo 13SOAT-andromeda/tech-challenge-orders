@@ -13,7 +13,7 @@ images:
 
 secretGenerator:
   - name: api-secrets
-    behavior: replace
+    behavior: create
     envs:
       - .env.secrets
 
