@@ -6,7 +6,6 @@ namespace: default
 resources:
   - ../../base
   - config.yaml
-  - ingress.yaml
 
 images:
   - name: tech-challenge-orders-api
