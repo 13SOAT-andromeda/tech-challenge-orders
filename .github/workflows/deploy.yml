@@ -46,22 +46,6 @@ jobs:
 
       - name: Generate overlay env files
         run: |
-<<<<<<< Updated upstream
-          cat > k8s/overlays/aws/.env.secrets << 'EOF'
-          AWS_ACCESS_KEY_ID=${{ secrets.AWS_ACCESS_KEY_ID }}
-          AWS_SECRET_ACCESS_KEY=${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          DD_API_KEY=${{ secrets.DD_API_KEY }}
-          EOF
-
-          cat > k8s/overlays/aws/.env.host << EOF
-          ORDERS_TOPIC_ARN=arn:aws:sns:${{ secrets.AWS_REGION }}:${{ secrets.AWS_ACCOUNT_ID }}:${{ vars.SNS_ORDERS_TOPIC_NAME }}
-          SQS_CATALOG_EVENTS_URL=https://sqs.${{ secrets.AWS_REGION }}.amazonaws.com/${{ secrets.AWS_ACCOUNT_ID }}/${{ vars.SQS_CATALOG_QUEUE_NAME }}
-          SQS_PAYMENT_EVENTS_URL=https://sqs.${{ secrets.AWS_REGION }}.amazonaws.com/${{ secrets.AWS_ACCOUNT_ID }}/${{ vars.SQS_ORDERS_QUEUE_NAME }}
-          USERS_BASE_URL=${{ secrets.USERS_BASE_URL }}
-          STOCK_BASE_URL=${{ secrets.STOCK_BASE_URL }}
-          PUBLIC_BASE_URL=${{ secrets.PUBLIC_BASE_URL }}
-          EOF
-=======
           printf 'DD_API_KEY=%s\nAWS_ACCESS_KEY_ID=%s\nAWS_SECRET_ACCESS_KEY=%s\nAWS_SESSION_TOKEN=%s\n' \
             "${{ secrets.DD_API_KEY }}" \
             "${{ secrets.AWS_ACCESS_KEY_ID }}" \
@@ -69,19 +53,19 @@ jobs:
             "${{ secrets.AWS_SESSION_TOKEN }}" \
             > k8s/overlays/aws/.env.secrets
 
-          printf 'AWS_REGION=%s\nDYNAMODB_TABLE=%s\nORDERS_TOPIC_ARN=%s\nSQS_CATALOG_EVENTS_URL=%s\nSQS_PAYMENT_EVENTS_URL=%s\nUSERS_BASE_URL=%s\nSTOCK_BASE_URL=%s\nDD_SERVICE=%s\nDD_VERSION=%s\nDD_SITE=%s\n' \
+          printf 'AWS_REGION=%s\nDYNAMODB_TABLE=%s\nORDERS_TOPIC_ARN=%s\nSQS_CATALOG_EVENTS_URL=%s\nSQS_PAYMENT_EVENTS_URL=%s\nUSERS_BASE_URL=%s\nSTOCK_BASE_URL=%s\nPUBLIC_BASE_URL=%s\nDD_SERVICE=%s\nDD_VERSION=%s\nDD_SITE=%s\n' \
             "${{ secrets.AWS_REGION }}" \
             "${{ secrets.DYNAMODB_TABLE }}" \
-            "${{ secrets.ORDERS_TOPIC_ARN }}" \
-            "${{ secrets.SQS_CATALOG_EVENTS_URL }}" \
-            "${{ secrets.SQS_PAYMENT_EVENTS_URL }}" \
+            "arn:aws:sns:${{ secrets.AWS_REGION }}:${{ secrets.AWS_ACCOUNT_ID }}:${{ vars.SNS_ORDERS_TOPIC_NAME }}" \
+            "https://sqs.${{ secrets.AWS_REGION }}.amazonaws.com/${{ secrets.AWS_ACCOUNT_ID }}/${{ vars.SQS_CATALOG_QUEUE_NAME }}" \
+            "https://sqs.${{ secrets.AWS_REGION }}.amazonaws.com/${{ secrets.AWS_ACCOUNT_ID }}/${{ vars.SQS_ORDERS_QUEUE_NAME }}" \
             "http://tech-challenge-users-svc" \
             "http://catalog-api-svc" \
-            "${{ secrets.DD_SERVICE }}" \
-            "${{ secrets.DD_VERSION }}" \
-            "${{ secrets.DD_SITE }}" \
+            "${{ secrets.PUBLIC_BASE_URL }}" \
+            "${{ vars.DD_SERVICE }}" \
+            "${{ vars.DD_VERSION }}" \
+            "${{ vars.DD_SITE }}" \
             > k8s/overlays/aws/.env.host
->>>>>>> Stashed changes
 
       - name: Apply Kustomize
         env:
