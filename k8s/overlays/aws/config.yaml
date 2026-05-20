@@ -3,27 +3,12 @@ kind: ConfigMap
 metadata:
   name: api-config
 data:
-  DB_HOST: ""
-  DB_PORT: "5432"
-  DB_USER: "postgres"
-  DB_NAME: "garagedb"
-  DB_SSLMODE: "require"
-  DB_TIMEZONE: "UTC"
   ENV: "production"
   HTTP_PORT: "8080"
-  HTTP_ALLOWED_ORIGINS: "*"
-  MAILTRAP_URL: "https://send.api.mailtrap.io/api"
-  API_VERSION: "1.0.0"
+  AWS_REGION: "us-east-1"
+  DYNAMODB_TABLE: "orders"
+  HTTP_CLIENT_TIMEOUT_MS: "2000"
   DD_ENV: "production"
-  DD_SERVICE: "tech-challenge-orders-api"
   DD_VERSION: "1.0.0"
+  DD_SERVICE: "tech-challenge-orders-api"
   DD_SITE: "us5.datadoghq.com"
----
-apiVersion: v1
-kind: Secret
-metadata:
-  name: api-secrets
-type: Opaque
-stringData:
-  ADMIN_EMAIL: "admin@admin.com"
-  ADMIN_DOCUMENT: "42692605802"

@@ -39,6 +39,20 @@ patches:
             valueFrom:
               fieldRef:
                 fieldPath: status.hostIP
+  - target:
+      kind: Deployment
+      name: tech-challenge-orders-worker
+    patch: |-
+      - op: replace
+        path: /spec/template/spec/containers/0/imagePullPolicy
+        value: Always
+      - op: add
+        path: /spec/template/spec/containers/0/env
+        value:
+          - name: DD_AGENT_HOST
+            valueFrom:
+              fieldRef:
+                fieldPath: status.hostIP
 
 generatorOptions:
   disableNameSuffixHash: true

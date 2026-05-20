@@ -59,26 +59,24 @@ jobs:
       - name: Generate overlay env files
         run: |
           cat > k8s/overlays/aws/.env.secrets << 'EOF'
+          AWS_ACCESS_KEY_ID=${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY=${{ secrets.AWS_SECRET_ACCESS_KEY }}
           DD_API_KEY=${{ secrets.DD_API_KEY }}
           EOF
 
           cat > k8s/overlays/aws/.env.host << EOF
-          AWS_REGION=${{ secrets.AWS_REGION }}
-          DYNAMODB_TABLE=${{ secrets.DYNAMODB_TABLE }}
-          ORDERS_TOPIC_ARN=${{ secrets.ORDERS_TOPIC_ARN }}
-          SQS_CATALOG_EVENTS_URL=${{ secrets.SQS_CATALOG_EVENTS_URL }}
-          SQS_PAYMENT_EVENTS_URL=${{ secrets.SQS_PAYMENT_EVENTS_URL }}
+          ORDERS_TOPIC_ARN=arn:aws:sns:${{ secrets.AWS_REGION }}:${{ secrets.AWS_ACCOUNT_ID }}:${{ vars.SNS_ORDERS_TOPIC_NAME }}
+          SQS_CATALOG_EVENTS_URL=https://sqs.${{ secrets.AWS_REGION }}.amazonaws.com/${{ secrets.AWS_ACCOUNT_ID }}/${{ vars.SQS_CATALOG_QUEUE_NAME }}
+          SQS_PAYMENT_EVENTS_URL=https://sqs.${{ secrets.AWS_REGION }}.amazonaws.com/${{ secrets.AWS_ACCOUNT_ID }}/${{ vars.SQS_ORDERS_QUEUE_NAME }}
           USERS_BASE_URL=${{ secrets.USERS_BASE_URL }}
           STOCK_BASE_URL=${{ secrets.STOCK_BASE_URL }}
-          DD_SERVICE=${{ secrets.DD_SERVICE }}
-          DD_VERSION=${{ secrets.DD_VERSION }}
-          DD_SITE=${{ secrets.DD_SITE }}
+          PUBLIC_BASE_URL=${{ secrets.PUBLIC_BASE_URL }}
           EOF
 
       - name: Apply Kustomize
         env:
           ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
-          ECR_REPOSITORY: tech-challenge-orders
+          ECR_REPOSITORY: tech-challenge-orders-api-repo
         run: |
           kubectl kustomize k8s/overlays/aws | \
             sed "s|ECR_IMAGE:latest|$ECR_REGISTRY/$ECR_REPOSITORY:latest|g" | \
