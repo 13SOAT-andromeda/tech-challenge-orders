@@ -98,13 +98,18 @@ func main() {
 	})
 	publisher := snspub.NewPublisher(snsClient)
 
+	var notifPublisher *snspub.NotificationPublisher
+	if cfg.SNS.NotificationTopicARN != "" {
+		notifPublisher = snspub.NewNotificationPublisher(snsClient, cfg.SNS.NotificationTopicARN)
+	}
+
 	// HTTP clients
 	usersClient := clients.NewUsersHTTPClient(cfg.Clients.UsersBaseURL, cfg.Clients.TimeoutMs)
 	stockClient := clients.NewStockHTTPClient(cfg.Clients.StockBaseURL, cfg.Clients.TimeoutMs)
 
 	// Use case service
 	svc := orderusecase.NewService(
-		repo, publisher, usersClient, stockClient, idempotency,
+		repo, publisher, notifPublisher, usersClient, stockClient, idempotency,
 		cfg.SNS.OrdersTopicARN, cfg.Http.PublicBaseURL,
 	)
 

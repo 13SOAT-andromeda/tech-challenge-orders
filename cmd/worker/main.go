@@ -13,6 +13,7 @@ import (
 	awssqs "github.com/aws/aws-sdk-go-v2/service/sqs"
 	awssns "github.com/aws/aws-sdk-go-v2/service/sns"
 
+	"github.com/13SOAT-andromeda/tech-challenge-orders/internal/adapter/clients"
 	"github.com/13SOAT-andromeda/tech-challenge-orders/internal/adapter/config"
 	"github.com/13SOAT-andromeda/tech-challenge-orders/internal/adapter/dynamo"
 	dynamoidem "github.com/13SOAT-andromeda/tech-challenge-orders/internal/adapter/dynamo"
@@ -65,8 +66,14 @@ func main() {
 
 	publisher := snspub.NewPublisher(snsClient)
 
-	// Service (users/stock clients not needed by Handle* use cases)
-	svc := orderusecase.NewService(repo, publisher, nil, nil, idempotency, cfg.SNS.OrdersTopicARN, cfg.Http.PublicBaseURL)
+	var notifPublisher *snspub.NotificationPublisher
+	if cfg.SNS.NotificationTopicARN != "" {
+		notifPublisher = snspub.NewNotificationPublisher(snsClient, cfg.SNS.NotificationTopicARN)
+	}
+
+	usersClient := clients.NewUsersHTTPClient(cfg.Clients.UsersBaseURL, cfg.Clients.TimeoutMs)
+
+	svc := orderusecase.NewService(repo, publisher, notifPublisher, usersClient, nil, idempotency, cfg.SNS.OrdersTopicARN, cfg.Http.PublicBaseURL)
 
 	// Consumers
 	type consumerDef struct {

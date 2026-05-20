@@ -41,12 +41,13 @@ func PaymentEvents(svc *orderusecase.Service) sqsadapter.Handler {
 		switch eventType {
 		case "payment.checkout_created":
 			var p struct {
-				OrderID string `json:"order_id"`
+				OrderID    string `json:"order_id"`
+				PaymentURL string `json:"payment_url"`
 			}
 			if err := json.Unmarshal(data, &p); err != nil {
 				return fmt.Errorf("payment.checkout_created: %w", err)
 			}
-			return svc.HandlePaymentCheckoutCreated(ctx, eventID, p.OrderID)
+			return svc.HandlePaymentCheckoutCreated(ctx, eventID, p.OrderID, p.PaymentURL)
 
 		case "payment.approved":
 			var p struct {

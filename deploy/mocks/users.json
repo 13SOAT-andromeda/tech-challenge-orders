@@ -179,7 +179,7 @@
               "value": "application/json"
             }
           ],
-          "body": "{\"id\":1,\"name\":\"Cliente Teste\",\"email\":\"cliente@teste.com\"}",
+          "body": "{\"id\":1,\"name\":\"Julio Vaz\",\"email\":\"julio.oliveiravaz0@gmail.com\"}",
           "rules": [],
           "rulesOperator": "OR"
         }
