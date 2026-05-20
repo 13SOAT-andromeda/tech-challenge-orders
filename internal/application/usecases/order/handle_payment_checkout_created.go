@@ -37,5 +37,7 @@ func (s *Service) HandlePaymentCheckoutCreated(ctx context.Context, eventID, ord
 		}
 	}
 
+	from, to, dur := lastTransitionDuration(order)
+	s.metrics.OrderStatusTransition(ctx, from, to, dur)
 	return nil
 }

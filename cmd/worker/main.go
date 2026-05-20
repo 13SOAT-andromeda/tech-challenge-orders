@@ -13,14 +13,18 @@ import (
 	awssqs "github.com/aws/aws-sdk-go-v2/service/sqs"
 	awssns "github.com/aws/aws-sdk-go-v2/service/sns"
 
+	"github.com/DataDog/datadog-go/v5/statsd"
+
 	"github.com/13SOAT-andromeda/tech-challenge-orders/internal/adapter/clients"
 	"github.com/13SOAT-andromeda/tech-challenge-orders/internal/adapter/config"
 	"github.com/13SOAT-andromeda/tech-challenge-orders/internal/adapter/dynamo"
 	dynamoidem "github.com/13SOAT-andromeda/tech-challenge-orders/internal/adapter/dynamo"
 	dynamorepo "github.com/13SOAT-andromeda/tech-challenge-orders/internal/adapter/dynamo/repository"
+	appmetrics "github.com/13SOAT-andromeda/tech-challenge-orders/internal/adapter/metrics"
 	snspub "github.com/13SOAT-andromeda/tech-challenge-orders/internal/adapter/sns"
 	sqsadapter "github.com/13SOAT-andromeda/tech-challenge-orders/internal/adapter/sqs"
 	"github.com/13SOAT-andromeda/tech-challenge-orders/internal/adapter/sqs/consumers"
+	"github.com/13SOAT-andromeda/tech-challenge-orders/internal/application/ports"
 	orderusecase "github.com/13SOAT-andromeda/tech-challenge-orders/internal/application/usecases/order"
 )
 
@@ -73,7 +77,27 @@ func main() {
 
 	usersClient := clients.NewUsersHTTPClient(cfg.Clients.UsersBaseURL, cfg.Clients.TimeoutMs)
 
-	svc := orderusecase.NewService(repo, publisher, notifPublisher, usersClient, nil, idempotency, cfg.SNS.OrdersTopicARN, cfg.Http.PublicBaseURL)
+	// Metrics
+	var orderMetrics ports.OrderMetrics = appmetrics.NoopOrderMetrics{}
+	if !cfg.DogStatsD.Disabled && cfg.DogStatsD.Addr != "" {
+		statsdClient, errStatsd := statsd.New(cfg.DogStatsD.Addr,
+			statsd.WithNamespace("tech_challenge."),
+			statsd.WithTags([]string{
+				"env:" + cfg.Env,
+				"service:" + cfg.Service,
+				"version:" + cfg.Version,
+			}),
+		)
+		if errStatsd != nil {
+			sugar.Warnw("dogstatsd unavailable, order metrics disabled", "error", errStatsd)
+		} else {
+			defer statsdClient.Close()
+			orderMetrics = appmetrics.NewOrderStatsd(statsdClient)
+		}
+	}
+
+	// Service (stock client not needed by Handle* use cases)
+	svc := orderusecase.NewService(repo, publisher, notifPublisher, usersClient, nil, idempotency, orderMetrics, cfg.SNS.OrdersTopicARN, cfg.Http.PublicBaseURL)
 
 	// Consumers
 	type consumerDef struct {

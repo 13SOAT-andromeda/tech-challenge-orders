@@ -25,6 +25,8 @@ func (s *Service) CompleteWorkOrder(ctx context.Context, orderID string) error {
 	if err := s.repo.Save(ctx, order); err != nil {
 		return fmt.Errorf("save order: %w", err)
 	}
+	from, to, dur := lastTransitionDuration(order)
+	s.metrics.OrderStatusTransition(ctx, from, to, dur)
 
 	priceCents := int64(0)
 	if order.PriceCents != nil {
