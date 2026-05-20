@@ -44,18 +44,6 @@ jobs:
       - name: Update Kubeconfig
         run: aws eks update-kubeconfig --region ${{ secrets.AWS_REGION }} --name eks-tech-challenge
 
-      - name: Configure Metrics Server
-        run: |
-          kubectl apply -f https://github.com/kubernetes-sigs/metrics-server/releases/latest/download/components.yaml
-
-          kubectl patch -n kube-system deployment metrics-server --type=json \
-            -p '[{"op":"add","path":"/spec/template/spec/containers/0/args/-","value":"--kubelet-insecure-tls"}]'
-
-          kubectl wait --namespace kube-system \
-            --for=condition=ready pod \
-            --selector=k8s-app=metrics-server \
-            --timeout=5s || true
-
       - name: Generate overlay env files
         run: |
           cat > k8s/overlays/aws/.env.secrets << 'EOF'
