@@ -21,9 +21,11 @@ type OrderApprovalRequested struct {
 // OrderApproved is published after Approve.
 // Consumed by: Stock service (reserves/decrements product items).
 type OrderApproved struct {
-	OrderID    string
-	Items      []ItemSnapshot // only Kind == ItemKindProduct entries
-	ApprovedAt time.Time
+	OrderID       string
+	CustomerName  string
+	CustomerEmail string
+	Items         []ItemSnapshot // only Kind == ItemKindProduct entries
+	ApprovedAt    time.Time
 }
 
 // OrderFinished is published after CompleteWork.

@@ -13,6 +13,11 @@ func (s *Service) ApproveOrder(ctx context.Context, orderID string) error {
 		return err
 	}
 
+	customer, err := s.users.GetCustomer(ctx, order.CustomerID)
+	if err != nil {
+		return fmt.Errorf("get customer: %w", err)
+	}
+
 	if err := order.Approve(); err != nil {
 		return err
 	}
@@ -33,9 +38,11 @@ func (s *Service) ApproveOrder(ctx context.Context, orderID string) error {
 	}
 
 	evt := domain.OrderApproved{
-		OrderID:    order.ID,
-		Items:      productItems,
-		ApprovedAt: approvedAt,
+		OrderID:       order.ID,
+		CustomerName:  customer.Name,
+		CustomerEmail: customer.Email,
+		Items:         productItems,
+		ApprovedAt:    approvedAt,
 	}
 
 	return s.publisher.Publish(ctx, s.topicARN, evt)
