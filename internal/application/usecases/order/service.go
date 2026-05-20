@@ -11,6 +11,7 @@ import (
 type Service struct {
 	repo          orderport.Repository
 	publisher     ports.EventPublisher
+	notifPublisher ports.NotificationPublisher
 	users         ports.UsersClient
 	stock         ports.StockClient
 	idempotency   ports.IdempotencyStore
@@ -22,6 +23,7 @@ type Service struct {
 func NewService(
 	repo orderport.Repository,
 	publisher ports.EventPublisher,
+	notifPublisher ports.NotificationPublisher,
 	users ports.UsersClient,
 	stock ports.StockClient,
 	idempotency ports.IdempotencyStore,
@@ -32,6 +34,7 @@ func NewService(
 	return &Service{
 		repo:          repo,
 		publisher:     publisher,
+		notifPublisher: notifPublisher,
 		users:         users,
 		stock:         stock,
 		idempotency:   idempotency,

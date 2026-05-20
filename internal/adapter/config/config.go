@@ -35,7 +35,8 @@ type DynamoDBConfig struct {
 }
 
 type SNSConfig struct {
-	OrdersTopicARN string
+	OrdersTopicARN      string
+	NotificationTopicARN string
 }
 
 type SQSConfig struct {
@@ -100,7 +101,8 @@ func Init() (*Config, error) {
 	}
 
 	sns := &SNSConfig{
-		OrdersTopicARN: getEnv("ORDERS_TOPIC_ARN", ""),
+		OrdersTopicARN:      getEnv("ORDERS_TOPIC_ARN", ""),
+		NotificationTopicARN: getEnv("NOTIFICATION_TOPIC_ARN", ""),
 	}
 
 	sqs := &SQSConfig{

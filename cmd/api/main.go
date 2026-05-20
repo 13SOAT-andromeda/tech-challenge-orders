@@ -98,9 +98,15 @@ func main() {
 	})
 	publisher := snspub.NewPublisher(snsClient)
 
+	var notifPublisher *snspub.NotificationPublisher
+	if cfg.SNS.NotificationTopicARN != "" {
+		notifPublisher = snspub.NewNotificationPublisher(snsClient, cfg.SNS.NotificationTopicARN)
+	}
+
 	// HTTP clients
 	usersClient := clients.NewUsersHTTPClient(cfg.Clients.UsersBaseURL, cfg.Clients.TimeoutMs)
 	stockClient := clients.NewStockHTTPClient(cfg.Clients.StockBaseURL, cfg.Clients.TimeoutMs)
+
 
 	// Metrics
 	var orderMetrics ports.OrderMetrics = appmetrics.NoopOrderMetrics{}
@@ -123,7 +129,7 @@ func main() {
 
 	// Use case service
 	svc := orderusecase.NewService(
-		repo, publisher, usersClient, stockClient, idempotency, orderMetrics,
+		repo, publisher, notifPublisher, usersClient, stockClient, idempotency, orderMetrics,
 		cfg.SNS.OrdersTopicARN, cfg.Http.PublicBaseURL,
 	)
 

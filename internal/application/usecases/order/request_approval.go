@@ -3,6 +3,7 @@ package order
 import (
 	"context"
 	"fmt"
+	"log"
 	"time"
 
 	"github.com/13SOAT-andromeda/tech-challenge-orders/internal/domain"
@@ -57,5 +58,15 @@ func (s *Service) RequestApproval(ctx context.Context, orderID string) error {
 		ExpiresAt:      time.Now().Add(7 * 24 * time.Hour),
 	}
 
-	return s.publisher.Publish(ctx, s.topicARN, evt)
+	if err := s.publisher.Publish(ctx, s.topicARN, evt); err != nil {
+		return err
+	}
+
+	if s.notifPublisher != nil {
+		if err := s.notifPublisher.PublishApprovalRequest(ctx, evt); err != nil {
+			log.Printf("warn: approval request notification failed: %v", err)
+		}
+	}
+
+	return nil
 }
