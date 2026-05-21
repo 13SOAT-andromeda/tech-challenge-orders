@@ -63,7 +63,7 @@ func (c *StockHTTPClient) CheckProductsBatch(ctx context.Context, items []domain
 		return nil, fmt.Errorf("marshal stock request: %w", err)
 	}
 
-	url := c.baseURL + "/products/check-batch"
+	url := c.baseURL + "/v1/catalog/products/check-batch"
 	resp, err := c.execute(ctx, func() (*http.Request, error) {
 		req, err := http.NewRequestWithContext(ctx, http.MethodPost, url, bytes.NewReader(payload))
 		if err != nil {

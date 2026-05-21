@@ -73,7 +73,7 @@ type maintenanceResp struct {
 }
 
 func (c *UsersHTTPClient) GetCustomerVehicle(ctx context.Context, id int64) (*ports.CustomerVehicle, error) {
-	url := c.baseURL + "/customers/" + strconv.FormatInt(id, 10) + "/vehicles"
+	url := c.baseURL + "/v1/users/customers/" + strconv.FormatInt(id, 10) + "/vehicles"
 	resp, err := c.execute(ctx, func() (*http.Request, error) {
 		return http.NewRequestWithContext(ctx, http.MethodGet, url, nil)
 	})
@@ -109,7 +109,7 @@ func (c *UsersHTTPClient) GetCustomerVehicle(ctx context.Context, id int64) (*po
 }
 
 func (c *UsersHTTPClient) GetCustomer(ctx context.Context, id int64) (*ports.Customer, error) {
-	url := c.baseURL + "/customers/" + strconv.FormatInt(id, 10)
+	url := c.baseURL + "/v1/users/customers/" + strconv.FormatInt(id, 10)
 	resp, err := c.execute(ctx, func() (*http.Request, error) {
 		return http.NewRequestWithContext(ctx, http.MethodGet, url, nil)
 	})
@@ -127,7 +127,7 @@ func (c *UsersHTTPClient) GetCustomer(ctx context.Context, id int64) (*ports.Cus
 }
 
 func (c *UsersHTTPClient) GetUser(ctx context.Context, id int64) (*ports.User, error) {
-	url := c.baseURL + "/users/" + strconv.FormatInt(id, 10)
+	url := c.baseURL + "/v1/users/users/" + strconv.FormatInt(id, 10)
 	resp, err := c.execute(ctx, func() (*http.Request, error) {
 		return http.NewRequestWithContext(ctx, http.MethodGet, url, nil)
 	})
@@ -145,7 +145,7 @@ func (c *UsersHTTPClient) GetUser(ctx context.Context, id int64) (*ports.User, e
 }
 
 func (c *UsersHTTPClient) GetEmployee(ctx context.Context, id int64) (*ports.Employee, error) {
-	url := c.baseURL + "/employees/" + strconv.FormatInt(id, 10)
+	url := c.baseURL + "/v1/users/employees/" + strconv.FormatInt(id, 10)
 	resp, err := c.execute(ctx, func() (*http.Request, error) {
 		return http.NewRequestWithContext(ctx, http.MethodGet, url, nil)
 	})
@@ -163,7 +163,7 @@ func (c *UsersHTTPClient) GetEmployee(ctx context.Context, id int64) (*ports.Emp
 }
 
 func (c *UsersHTTPClient) GetEmployeeByUserID(ctx context.Context, userID int64) (*ports.Employee, error) {
-	url := c.baseURL + "/users/" + strconv.FormatInt(userID, 10) + "/employee"
+	url := c.baseURL + "/v1/users/users/" + strconv.FormatInt(userID, 10) + "/employee"
 	resp, err := c.execute(ctx, func() (*http.Request, error) {
 		return http.NewRequestWithContext(ctx, http.MethodGet, url, nil)
 	})
@@ -181,7 +181,7 @@ func (c *UsersHTTPClient) GetEmployeeByUserID(ctx context.Context, userID int64)
 }
 
 func (c *UsersHTTPClient) GetCompany(ctx context.Context, id int64) (*ports.Company, error) {
-	url := c.baseURL + "/companies/" + strconv.FormatInt(id, 10)
+	url := c.baseURL + "/v1/users/companies/" + strconv.FormatInt(id, 10)
 	resp, err := c.execute(ctx, func() (*http.Request, error) {
 		return http.NewRequestWithContext(ctx, http.MethodGet, url, nil)
 	})
@@ -207,7 +207,7 @@ func (c *UsersHTTPClient) GetMaintenancesBatch(ctx context.Context, ids []int64)
 	for _, id := range ids {
 		parts = append(parts, strconv.FormatInt(id, 10))
 	}
-	url := c.baseURL + "/maintenances/check-batch?ids=" + strings.Join(parts, ",")
+	url := c.baseURL + "/v1/users/maintenances/check-batch?ids=" + strings.Join(parts, ",")
 	resp, err := c.execute(ctx, func() (*http.Request, error) {
 		return http.NewRequestWithContext(ctx, http.MethodGet, url, nil)
 	})
