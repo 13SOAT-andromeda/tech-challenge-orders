@@ -74,6 +74,7 @@ func NewRouter(
 	api := router.Group("/v1")
 	protected := api.Group("/")
 	protected.Use(middlewares.AuthRequired())
+	protected.Use(middlewares.InjectUserContext())
 	{
 		orderGroup := protected.Group("/orders")
 		orderGroup.Use(middlewares.RoleRequired("administrator", "attendant", "mechanic"))

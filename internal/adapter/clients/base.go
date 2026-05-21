@@ -17,6 +17,9 @@ type contextKey string
 const (
 	ctxRequestID   contextKey = "x-request-id"
 	ctxTraceparent contextKey = "traceparent"
+	ctxUserID      contextKey = "x-user-id"
+	ctxUserEmail   contextKey = "x-user-email"
+	ctxUserRole    contextKey = "x-user-role"
 )
 
 // WithRequestHeaders injects outbound propagation headers into ctx.
@@ -24,6 +27,14 @@ const (
 func WithRequestHeaders(ctx context.Context, requestID, traceparent string) context.Context {
 	ctx = context.WithValue(ctx, ctxRequestID, requestID)
 	return context.WithValue(ctx, ctxTraceparent, traceparent)
+}
+
+// WithUserHeaders injects the authenticated user headers into ctx so they are
+// forwarded on outbound calls to upstream services.
+func WithUserHeaders(ctx context.Context, userID, userEmail, userRole string) context.Context {
+	ctx = context.WithValue(ctx, ctxUserID, userID)
+	ctx = context.WithValue(ctx, ctxUserEmail, userEmail)
+	return context.WithValue(ctx, ctxUserRole, userRole)
 }
 
 type baseClient struct {
@@ -58,6 +69,15 @@ func (b *baseClient) execute(ctx context.Context, makeReq func() (*http.Request,
 			}
 			if tp, ok := ctx.Value(ctxTraceparent).(string); ok && tp != "" {
 				req.Header.Set("traceparent", tp)
+			}
+			if uid, ok := ctx.Value(ctxUserID).(string); ok && uid != "" {
+				req.Header.Set("X-User-Id", uid)
+			}
+			if email, ok := ctx.Value(ctxUserEmail).(string); ok && email != "" {
+				req.Header.Set("X-User-Email", email)
+			}
+			if role, ok := ctx.Value(ctxUserRole).(string); ok && role != "" {
+				req.Header.Set("X-User-Role", role)
 			}
 
 			url := req.URL.String()
