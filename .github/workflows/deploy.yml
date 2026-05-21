@@ -53,9 +53,8 @@ jobs:
             "${{ secrets.AWS_SESSION_TOKEN }}" \
             > k8s/overlays/aws/.env.secrets
 
-          printf 'AWS_REGION=%s\nDYNAMODB_TABLE=%s\nORDERS_TOPIC_ARN=%s\nSQS_CATALOG_EVENTS_URL=%s\nSQS_PAYMENT_EVENTS_URL=%s\nUSERS_BASE_URL=%s\nSTOCK_BASE_URL=%s\nPUBLIC_BASE_URL=%s\nDD_SERVICE=%s\nDD_VERSION=%s\nDD_SITE=%s\n' \
+          printf 'AWS_REGION=%s\nORDERS_TOPIC_ARN=%s\nSQS_CATALOG_EVENTS_URL=%s\nSQS_PAYMENT_EVENTS_URL=%s\nUSERS_BASE_URL=%s\nSTOCK_BASE_URL=%s\nPUBLIC_BASE_URL=%s\nDD_SERVICE=%s\nDD_VERSION=%s\nDD_SITE=%s\n' \
             "${{ secrets.AWS_REGION }}" \
-            "${{ secrets.DYNAMODB_TABLE }}" \
             "arn:aws:sns:${{ secrets.AWS_REGION }}:${{ secrets.AWS_ACCOUNT_ID }}:${{ vars.SNS_ORDERS_TOPIC_NAME }}" \
             "https://sqs.${{ secrets.AWS_REGION }}.amazonaws.com/${{ secrets.AWS_ACCOUNT_ID }}/${{ vars.SQS_CATALOG_QUEUE_NAME }}" \
             "https://sqs.${{ secrets.AWS_REGION }}.amazonaws.com/${{ secrets.AWS_ACCOUNT_ID }}/${{ vars.SQS_ORDERS_QUEUE_NAME }}" \
