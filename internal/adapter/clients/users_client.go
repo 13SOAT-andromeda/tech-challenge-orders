@@ -127,7 +127,7 @@ func (c *UsersHTTPClient) GetCustomer(ctx context.Context, id int64) (*ports.Cus
 }
 
 func (c *UsersHTTPClient) GetUser(ctx context.Context, id int64) (*ports.User, error) {
-	url := c.baseURL + "/v1/users/users/" + strconv.FormatInt(id, 10)
+	url := c.baseURL + "/v1/users/" + strconv.FormatInt(id, 10)
 	resp, err := c.execute(ctx, func() (*http.Request, error) {
 		return http.NewRequestWithContext(ctx, http.MethodGet, url, nil)
 	})
