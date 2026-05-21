@@ -21,8 +21,8 @@ func AuthRequired() gin.HandlerFunc {
 		internalToken := c.GetHeader("X-Internal-Token")
 		expectedToken := os.Getenv("INTERNAL_AUTH_TOKEN")
 		if internalToken != "" && expectedToken != "" && internalToken == expectedToken {
-			c.Set(UserIDKey, "system")
-			c.Set(UserEmailKey, "system@tech-challenge.internal")
+			c.Set(UserIDKey, os.Getenv("ADMIN_DOCUMENT"))
+			c.Set(UserEmailKey, os.Getenv("ADMIN_EMAIL"))
 			c.Set(UserRoleKey, "administrator")
 			c.Next()
 			return
