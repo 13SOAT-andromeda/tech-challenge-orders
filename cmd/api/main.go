@@ -98,7 +98,7 @@ func main() {
 	})
 	publisher := snspub.NewPublisher(snsClient)
 
-	var notifPublisher *snspub.NotificationPublisher
+	var notifPublisher ports.NotificationPublisher
 	if cfg.SNS.NotificationTopicARN != "" {
 		notifPublisher = snspub.NewNotificationPublisher(snsClient, cfg.SNS.NotificationTopicARN)
 	}

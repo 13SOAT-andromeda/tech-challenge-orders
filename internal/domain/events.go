@@ -21,20 +21,20 @@ type OrderApprovalRequested struct {
 // OrderApproved is published after Approve.
 // Consumed by: Stock service (reserves/decrements product items).
 type OrderApproved struct {
-	OrderID       string
-	CustomerName  string
-	CustomerEmail string
-	Items         []ItemSnapshot // only Kind == ItemKindProduct entries
-	ApprovedAt    time.Time
+	OrderID       string         `json:"order_id"`
+	CustomerName  string         `json:"customer_name"`
+	CustomerEmail string         `json:"customer_email"`
+	Items         []ItemSnapshot `json:"items"`
+	ApprovedAt    time.Time      `json:"approved_at"`
 }
 
 // OrderFinished is published after CompleteWork.
 // Consumed by: Payments service (generates a payment request).
 type OrderFinished struct {
-	OrderID       string
-	CustomerID    int64
-	CustomerEmail string
-	AmountCents   int64
-	Items         []ItemSnapshot
-	FinishedAt    time.Time
+	OrderID       string         `json:"order_id"`
+	CustomerID    int64          `json:"customer_id"`
+	CustomerEmail string         `json:"customer_email"`
+	AmountCents   int64          `json:"amount_cents"`
+	Items         []ItemSnapshot `json:"items"`
+	FinishedAt    time.Time      `json:"finished_at"`
 }
