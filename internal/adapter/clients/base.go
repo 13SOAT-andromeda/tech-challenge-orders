@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"os"
 	"time"
 
 	"github.com/cenkalti/backoff/v5"
@@ -64,6 +65,13 @@ func (b *baseClient) execute(ctx context.Context, makeReq func() (*http.Request,
 			if err != nil {
 				return nil, backoff.Permanent(err)
 			}
+
+			// Injected by S2S Auth Strategy
+			internalToken := os.Getenv("INTERNAL_AUTH_TOKEN")
+			if internalToken != "" {
+				req.Header.Set("X-Internal-Token", internalToken)
+			}
+
 			if id, ok := ctx.Value(ctxRequestID).(string); ok && id != "" {
 				req.Header.Set("X-Request-ID", id)
 			}
