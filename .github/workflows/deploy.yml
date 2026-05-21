@@ -61,7 +61,7 @@ jobs:
             "https://sqs.${{ secrets.AWS_REGION }}.amazonaws.com/${{ secrets.AWS_ACCOUNT_ID }}/${{ vars.SQS_ORDERS_QUEUE_NAME }}" \
             "http://tech-challenge-users-svc.default.svc.cluster.local" \
             "http://catalog-api-svc.default.svc.cluster.local" \
-            "${{ secrets.PUBLIC_BASE_URL }}" \
+            "${{ secrets.PUBLIC_BASE_URL }}/dev/v1" \
             "${{ vars.DD_SERVICE }}" \
             "${{ vars.DD_VERSION }}" \
             "${{ vars.DD_SITE }}" \

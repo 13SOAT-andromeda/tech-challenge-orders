@@ -53,8 +53,8 @@ func (s *Service) RequestApproval(ctx context.Context, orderID string) error {
 		DiagnosticNote: diagnosticNote,
 		Items:          order.Items,
 		TotalCents:     priceCents,
-		ApprovalURL:    s.publicBaseURL + "/api/orders/" + order.ID + "/approve",
-		RejectURL:      s.publicBaseURL + "/api/orders/" + order.ID + "/reject",
+		ApprovalURL:    s.publicBaseURL + "/orders/" + order.ID + "/approve",
+		RejectURL:      s.publicBaseURL + "/orders/" + order.ID + "/reject",
 		ExpiresAt:      time.Now().Add(7 * 24 * time.Hour),
 	}
 
