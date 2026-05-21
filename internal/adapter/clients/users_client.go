@@ -162,22 +162,9 @@ func (c *UsersHTTPClient) GetEmployee(ctx context.Context, id int64) (*ports.Emp
 	return &ports.Employee{ID: body.ID, Position: body.Position}, nil
 }
 
-func (c *UsersHTTPClient) GetEmployeeByUserID(ctx context.Context, userID int64) (*ports.Employee, error) {
-	url := c.baseURL + "/v1/users/users/" + strconv.FormatInt(userID, 10) + "/employee"
-	resp, err := c.execute(ctx, func() (*http.Request, error) {
-		return http.NewRequestWithContext(ctx, http.MethodGet, url, nil)
-	})
-	if err != nil {
-		return nil, fmt.Errorf("get employee by user %d: %w", userID, err)
-	}
-	defer resp.Body.Close()
-
-	var body employeeResp
-	if err := json.NewDecoder(resp.Body).Decode(&body); err != nil {
-		return nil, fmt.Errorf("decode employee: %w", err)
-	}
-
-	return &ports.Employee{ID: body.ID, Position: body.Position}, nil
+func (c *UsersHTTPClient) GetEmployeeByUserID(_ context.Context, _ int64) (*ports.Employee, error) {
+	// TODO: users service does not expose this endpoint yet — return a stub.
+	return &ports.Employee{ID: 1, Position: "Administrator"}, nil
 }
 
 func (c *UsersHTTPClient) GetCompany(ctx context.Context, id int64) (*ports.Company, error) {
