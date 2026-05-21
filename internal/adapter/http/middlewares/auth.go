@@ -2,6 +2,7 @@ package middlewares
 
 import (
 	"net/http"
+	"os"
 
 	"github.com/gin-gonic/gin"
 )
@@ -16,6 +17,17 @@ const (
 // upstream API Gateway + Lambda Authorizer. Returns 401 if any header is absent.
 func AuthRequired() gin.HandlerFunc {
 	return func(c *gin.Context) {
+		// Check for internal S2S token first
+		internalToken := c.GetHeader("X-Internal-Token")
+		expectedToken := os.Getenv("INTERNAL_AUTH_TOKEN")
+		if internalToken != "" && expectedToken != "" && internalToken == expectedToken {
+			c.Set(UserIDKey, "system")
+			c.Set(UserEmailKey, "system@tech-challenge.internal")
+			c.Set(UserRoleKey, "administrator")
+			c.Next()
+			return
+		}
+
 		userID := c.GetHeader("X-User-Id")
 		userEmail := c.GetHeader("X-User-Email")
 		userRole := c.GetHeader("X-User-Role")

@@ -46,11 +46,12 @@ jobs:
 
       - name: Generate overlay env files
         run: |
-          printf 'DD_API_KEY=%s\nAWS_ACCESS_KEY_ID=%s\nAWS_SECRET_ACCESS_KEY=%s\nAWS_SESSION_TOKEN=%s\n' \
+          printf 'DD_API_KEY=%s\nAWS_ACCESS_KEY_ID=%s\nAWS_SECRET_ACCESS_KEY=%s\nAWS_SESSION_TOKEN=%s\nINTERNAL_AUTH_TOKEN=%s\n' \
             "${{ secrets.DD_API_KEY }}" \
             "${{ secrets.AWS_ACCESS_KEY_ID }}" \
             "${{ secrets.AWS_SECRET_ACCESS_KEY }}" \
             "${{ secrets.AWS_SESSION_TOKEN }}" \
+            "${{ secrets.INTERNAL_AUTH_TOKEN }}" \
             > k8s/overlays/aws/.env.secrets
 
           printf 'AWS_REGION=%s\nORDERS_TOPIC_ARN=%s\nNOTIFICATION_TOPIC_ARN=%s\nSQS_CATALOG_EVENTS_URL=%s\nSQS_PAYMENT_EVENTS_URL=%s\nUSERS_BASE_URL=%s\nSTOCK_BASE_URL=%s\nPUBLIC_BASE_URL=%s\nDD_SERVICE=%s\nDD_VERSION=%s\nDD_SITE=%s\n' \
