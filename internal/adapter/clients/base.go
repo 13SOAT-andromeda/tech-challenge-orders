@@ -2,7 +2,9 @@ package clients
 
 import (
 	"context"
+	"errors"
 	"fmt"
+	"log"
 	"net/http"
 	"time"
 
@@ -57,22 +59,32 @@ func (b *baseClient) execute(ctx context.Context, makeReq func() (*http.Request,
 			if tp, ok := ctx.Value(ctxTraceparent).(string); ok && tp != "" {
 				req.Header.Set("traceparent", tp)
 			}
+
+			url := req.URL.String()
+			log.Printf("[http-client] %s %s", req.Method, url)
+
 			resp, err := b.http.Do(req)
 			if err != nil {
+				log.Printf("[http-client] %s %s: network error: %v", req.Method, url, err)
 				return nil, err // network/timeout — retryable
 			}
 			if resp.StatusCode >= 500 {
 				resp.Body.Close()
+				log.Printf("[http-client] %s %s: upstream error %d", req.Method, url, resp.StatusCode)
 				return nil, fmt.Errorf("upstream %d", resp.StatusCode) // retryable
 			}
 			if resp.StatusCode >= 400 {
 				resp.Body.Close()
+				log.Printf("[http-client] %s %s: client error %d", req.Method, url, resp.StatusCode)
 				return nil, backoff.Permanent(fmt.Errorf("client error %d", resp.StatusCode))
 			}
 			return resp, nil
 		}, backoff.WithMaxTries(3))
 	})
 	if err != nil {
+		if errors.Is(err, gobreaker.ErrOpenState) || errors.Is(err, gobreaker.ErrTooManyRequests) {
+			log.Printf("[http-client] circuit breaker open: %s", b.cb.Name())
+		}
 		return nil, err
 	}
 	return raw.(*http.Response), nil
