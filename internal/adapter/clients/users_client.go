@@ -45,6 +45,11 @@ type vehicleResp struct {
 }
 
 type customerResp struct {
+	ID     int64      `json:"id"`
+	Person personResp `json:"person"`
+}
+
+type personResp struct {
 	ID    int64  `json:"id"`
 	Name  string `json:"name"`
 	Email string `json:"email"`
@@ -91,7 +96,11 @@ func (c *UsersHTTPClient) GetCustomerVehicle(ctx context.Context, id int64) (*po
 	}
 
 	cv := body[0]
-	customer := &ports.Customer{ID: cv.Customer.ID, Name: cv.Customer.Name, Email: cv.Customer.Email}
+	customer := &ports.Customer{
+		ID:    cv.Customer.ID,
+		Name:  cv.Customer.Person.Name,
+		Email: cv.Customer.Person.Email,
+	}
 	return &ports.CustomerVehicle{
 		ID:         cv.ID,
 		CustomerID: cv.CustomerID,
@@ -123,7 +132,11 @@ func (c *UsersHTTPClient) GetCustomer(ctx context.Context, id int64) (*ports.Cus
 		return nil, fmt.Errorf("decode customer: %w", err)
 	}
 
-	return &ports.Customer{ID: body.ID, Name: body.Name, Email: body.Email}, nil
+	return &ports.Customer{
+		ID:    body.ID,
+		Name:  body.Person.Name,
+		Email: body.Person.Email,
+	}, nil
 }
 
 func (c *UsersHTTPClient) GetUser(ctx context.Context, id int64) (*ports.User, error) {
